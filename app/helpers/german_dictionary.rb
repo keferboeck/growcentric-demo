@@ -1194,8 +1194,6 @@ module GermanDictionary
     "Welcome back. Your shop has been busy." => "Willkommen zurück. Dein Shop war fleißig.",
     "Forgot password?" => "Passwort vergessen?",
     "Keep me signed in" => "Angemeldet bleiben",
-    "or" => "oder",
-    "Continue with Google" => "Mit Google fortfahren",
     "New to GrowCentric?" => "Neu bei GrowCentric?",
     "Request access" => "Zugang anfragen",
     "Create your account" => "Erstelle deinen Account",

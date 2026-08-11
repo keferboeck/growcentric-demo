@@ -7,6 +7,6 @@
 <a href="<%= toggle_url %>"
    aria-label="<%= I18n.locale == :de ? "Switch to English" : "Auf Deutsch wechseln" %>"
    title="<%= I18n.locale == :de ? "Switch to English" : "Auf Deutsch wechseln" %>"
-   class="group rounded-full bg-white/90 px-3 py-2 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur transition hover:ring-zinc-900/10">
+   class="group inline-flex items-center justify-center rounded-full bg-white/90 px-3 py-2 shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur transition hover:ring-zinc-900/10">
   <%= render "shared/flag", country: I18n.locale == :de ? :de : :uk, css: "h-6 w-6", suffix: "-nav" %>
 </a>
