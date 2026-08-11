@@ -72,6 +72,25 @@ bin/dev        # runs the server + tailwind watcher (Procfile.dev)
 Database credentials are in `config/database.yml` (local `postgres` user; override the
 password with `GROWCENTRIC_DB_PASSWORD`).
 
+## Deployment (DigitalOcean App Platform, GitHub deploy)
+
+The app deploys straight from GitHub via App Platform's Ruby buildpack; the spec lives
+in `.do/app.yaml` (Procfile: `web: bundle exec puma -C config/puma.rb`):
+
+1. Push the repo to GitHub and update the two `github.repo` entries in `.do/app.yaml`.
+2. Create the app from the spec (`doctl apps create --spec .do/app.yaml` or paste the
+   spec in the dashboard under Create App -> Edit App Spec). It provisions a dev
+   Postgres and wires `DATABASE_URL`; the buildpack precompiles assets automatically.
+3. Set the secrets in the dashboard: `SECRET_KEY_BASE` (generate with `bin/rails secret`)
+   and optionally `GROWCENTRIC_DEMO_PASSWORD` for the demo login.
+4. After the first deploy, point `APP_HOST` at the assigned URL (or custom domain).
+
+A `PRE_DEPLOY` job runs `rails db:prepare db:seed` before every deploy; the seeds are
+idempotent and date-relative, so each deploy also refreshes the demo data (remove
+`db:seed` from the job command if you want the data left alone). Health check is `/up`
+(not behind the login wall). Password reset mails use the `:test` delivery in
+production too, since the demo has no SMTP.
+
 Re-running `bin/rails db:seed` resets all demo data; the forecast is generated relative
 to the current date, so re-seed before recording new screenshots or videos to keep the
 "Today" marker fresh.

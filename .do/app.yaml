@@ -1,0 +1,89 @@
+# DigitalOcean App Platform spec for the GrowCentric demo.
+# GitHub buildpack deploy (no Docker): App Platform detects the Ruby app,
+# installs the bundle and runs assets:precompile automatically.
+#
+# Before first use:
+#   1. Replace YOUR_GITHUB_USER/GrowCentricDemo with the real repo.
+#   2. Set SECRET_KEY_BASE in the App Platform dashboard (generate one locally
+#      with `bin/rails secret`); same for GROWCENTRIC_DEMO_PASSWORD if you want
+#      a different login password than the seed default.
+#   3. After the first deploy, set APP_HOST to the URL App Platform assigns
+#      (or your custom domain) so Devise mail links render correctly.
+#
+# Import via: doctl apps create --spec .do/app.yaml
+# or paste it in the dashboard under "Create App -> Edit App Spec".
+
+name: growcentric-demo
+region: fra
+
+services:
+  - name: web
+    environment_slug: ruby
+    source_dir: /
+    github:
+      repo: YOUR_GITHUB_USER/GrowCentricDemo
+      branch: main
+      deploy_on_push: true
+    run_command: bundle exec puma -C config/puma.rb
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xs
+    health_check:
+      http_path: /up
+      initial_delay_seconds: 30
+    envs:
+      - key: RAILS_ENV
+        scope: RUN_AND_BUILD_TIME
+        value: production
+      - key: RACK_ENV
+        scope: RUN_AND_BUILD_TIME
+        value: production
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: SECRET_KEY_BASE
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: CHANGE_ME_run_bin_rails_secret
+      - key: GROWCENTRIC_DEMO_PASSWORD
+        scope: RUN_TIME
+        type: SECRET
+        value: CHANGE_ME_demo_login_password
+      - key: APP_HOST
+        scope: RUN_TIME
+        value: growcentric-demo.ondigitalocean.app
+
+# Runs before every deploy: migrations plus the idempotent, date-relative seeds,
+# so each deploy also refreshes the demo data. Drop `db:seed` from the command
+# if you ever want the data left alone.
+jobs:
+  - name: migrate
+    kind: PRE_DEPLOY
+    environment_slug: ruby
+    source_dir: /
+    github:
+      repo: YOUR_GITHUB_USER/GrowCentricDemo
+      branch: main
+    run_command: bundle exec rails db:prepare db:seed
+    instance_size_slug: basic-xs
+    envs:
+      - key: RAILS_ENV
+        scope: RUN_AND_BUILD_TIME
+        value: production
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: SECRET_KEY_BASE
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: CHANGE_ME_run_bin_rails_secret
+      - key: GROWCENTRIC_DEMO_PASSWORD
+        scope: RUN_TIME
+        type: SECRET
+        value: CHANGE_ME_demo_login_password
+
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: false

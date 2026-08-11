@@ -71,6 +71,11 @@ Rails.application.configure do
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true
 
+  # Demo has no SMTP: Devise reset mails go to the test inbox, the app never 500s.
+  config.action_mailer.delivery_method = :test
+  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "growcentric-demo.ondigitalocean.app"), protocol: "https" }
+
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
