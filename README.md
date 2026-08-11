@@ -85,10 +85,12 @@ in `.do/app.yaml` (Procfile: `web: bundle exec puma -C config/puma.rb`):
    and optionally `GROWCENTRIC_DEMO_PASSWORD` for the demo login.
 4. After the first deploy, point `APP_HOST` at the assigned URL (or custom domain).
 
-The web process runs `rails db:prepare db:seed` before starting Puma; the seeds are
-idempotent and date-relative, so each deploy migrates the database and refreshes the
-demo data (remove `db:seed` from the command if you want the data left alone; it also
-makes boot take a few seconds longer, covered by the health check's initial delay).
+A `PRE_DEPLOY` job (App Platform's release phase; DO ignores Procfile `release:` lines)
+runs `rails db:prepare db:seed` after each build, before the new version goes live.
+The seeds are idempotent and date-relative, so each deploy migrates the database and
+refreshes the demo data (remove `db:seed` from the job command if you want the data
+left alone). The job must exist in the app spec: if the app was created via dashboard
+auto-detect, add the `jobs:` block from `.do/app.yaml` under Settings -> App Spec.
 Health check is `/up`
 (not behind the login wall). Password reset mails use the `:test` delivery in
 production too, since the demo has no SMTP.
