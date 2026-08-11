@@ -7,7 +7,7 @@ Demo pages for **GrowCentric.ai**: a product teaser used for screenshots and dem
 No real integrations: every page is rendered from seeded demo data. The app sits behind
 a Devise login wall; the seeded demo user is `georg@keferboeck.com` (password comes from
 `GROWCENTRIC_DEMO_PASSWORD`, with a default set in `db/seeds.rb`). `/register` has no
-signup form: GrowCentric.ai is in private beta, access requests go to georg@growcentric.ai.
+signup form: GrowCentric.ai is in private beta, access requests go to join@growcentric.ai.
 
 The demo merchant is **Velora Cycling Supply**, a fictional Vienna-based Shopify shop.
 All brands, competitors and domains in the data are invented.

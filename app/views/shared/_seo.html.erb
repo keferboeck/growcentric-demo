@@ -1,0 +1,63 @@
+<%# SEO and AIO head block, shared by both layouts. All copy comes through dt()
+    so it localizes, and metadata text stays free of hyphens and dashes. %>
+<%
+  page_title = content_for(:title)
+  full_title = page_title.present? ? "#{page_title} · GrowCentric.ai" : "GrowCentric.ai · #{dt('The growth brain for your eCommerce store')}"
+  meta_description = content_for(:meta_description).presence ||
+    dt("GrowCentric.ai watches your market, your prices and your campaigns around the clock: competitor intelligence, dynamic pricing, forecasts and AI content for eCommerce shops.")
+  base = request.base_url
+  canonical = base + request.path
+%>
+<title><%= full_title %></title>
+<meta name="description" content="<%= meta_description %>">
+<meta name="robots" content="<%= user_signed_in? ? "noindex, nofollow" : "index, follow" %>">
+<link rel="canonical" href="<%= canonical %>">
+<link rel="alternate" hreflang="en" href="<%= canonical %>?locale=en">
+<link rel="alternate" hreflang="de" href="<%= canonical %>?locale=de">
+<link rel="alternate" hreflang="x-default" href="<%= canonical %>">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GrowCentric.ai">
+<meta property="og:title" content="<%= full_title %>">
+<meta property="og:description" content="<%= meta_description %>">
+<meta property="og:url" content="<%= canonical %>">
+<meta property="og:image" content="<%= base %>/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="<%= I18n.locale == :de ? "de_DE" : "en_GB" %>">
+<meta property="og:locale:alternate" content="<%= I18n.locale == :de ? "en_GB" : "de_DE" %>">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= full_title %>">
+<meta name="twitter:description" content="<%= meta_description %>">
+<meta name="twitter:image" content="<%= base %>/og-image.png">
+
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#b060ff">
+
+<% unless user_signed_in? %>
+  <script type="application/ld+json"><%= {
+    "@context" => "https://schema.org",
+    "@graph" => [
+      {
+        "@type" => "Organization",
+        "@id" => "https://growcentric.ai/#organization",
+        "name" => "GrowCentric.ai",
+        "url" => "https://growcentric.ai",
+        "logo" => "#{base}/icon-512.png",
+        "email" => "join@growcentric.ai"
+      },
+      {
+        "@type" => "SoftwareApplication",
+        "name" => "GrowCentric.ai",
+        "url" => base,
+        "applicationCategory" => "BusinessApplication",
+        "operatingSystem" => "Web",
+        "description" => meta_description,
+        "inLanguage" => [ "en", "de" ],
+        "publisher" => { "@id" => "https://growcentric.ai/#organization" }
+      }
+    ]
+  }.to_json.html_safe %></script>
+<% end %>

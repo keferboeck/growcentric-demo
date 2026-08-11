@@ -269,7 +269,7 @@ Nine sections behind a settings sub-navigation; the pages they govern link back 
   Password reset works end to end (`/password/reset`, mail delivery is `:test` in dev, the
   emailed link opens the styled "choose a new password" screen). `/register` is deliberately
   not a signup form: a gradient-bordered private-beta card explains that only invited and
-  selected eCommerce shops have access and points to georg@growcentric.ai for test-phase
+  selected eCommerce shops have access and points to join@growcentric.ai for test-phase
   requests. Auth screens share the `auth` layout, both languages, du-Form Devise messages
   via `config/locales/devise.de.yml`. Demo user: georg@keferboeck.com (seeded, password via
   `GROWCENTRIC_DEMO_PASSWORD` or the seed default). Sign out lives in the user menu.

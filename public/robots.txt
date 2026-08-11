@@ -1,1 +1,6 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+# All crawlers welcome, including AI assistants and answer engines.
+# Everything behind the login wall redirects to /login anyway.
+User-agent: *
+Allow: /
+
+Sitemap: https://app.growcentric.ai/sitemap.xml

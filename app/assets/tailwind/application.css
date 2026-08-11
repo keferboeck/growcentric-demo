@@ -20,12 +20,25 @@
   --color-accent-950: #360555;
 }
 
-/* Brand gradient utilities: match the landing page hero */
-.bg-brand-gradient {
+/* Brand gradient utilities: match the landing page hero.
+   Defined via @utility so they compose with variants (peer-checked:, hover:). */
+@utility bg-brand-gradient {
   background-image: linear-gradient(115deg, var(--color-brand-cream) 28%, var(--color-brand-pink) 70%, var(--color-brand-purple));
 }
 .text-brand-gradient {
   background-image: linear-gradient(to right, var(--color-brand-cream) 28%, var(--color-brand-pink) 70%, var(--color-brand-purple));
   background-clip: text;
   color: transparent;
+}
+
+/* Focus highlight comes from the Tailwind ring utilities in brand purple;
+   the browser default outline would paint over it in blue. */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
 }

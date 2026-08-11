@@ -1187,6 +1187,10 @@ module GermanDictionary
     "AI citations / month" => "KI-Zitate / Monat",
     "Every page ships clean headings, schema.org product data and FAQ blocks that AI assistants can cite. When someone asks their assistant for the best bike light under €120, Velora is the shop it quotes." => "Jede Seite liefert saubere Überschriften, schema.org-Produktdaten und FAQ-Blöcke, die KI-Assistenten zitieren können. Wenn jemand seinen Assistenten nach dem besten Fahrradlicht unter €120 fragt, ist Velora der Shop, den er zitiert.",
 
+    # SEO and AIO metadata (keep free of hyphens and dashes in both languages)
+    "GrowCentric.ai watches your market, your prices and your campaigns around the clock: competitor intelligence, dynamic pricing, forecasts and AI content for eCommerce shops." => "GrowCentric.ai beobachtet deinen Markt, deine Preise und deine Kampagnen rund um die Uhr: Wettbewerber Intelligenz, Dynamic Pricing, Forecasts und KI Content für eCommerce Shops.",
+    "GrowCentric.ai is in private beta. Invited and selected eCommerce shops get access first. Request a spot in the test phase by mail to join@growcentric.ai." => "GrowCentric.ai ist in der privaten Beta. Eingeladene und ausgewählte eCommerce Shops erhalten zuerst Zugang. Einen Platz in der Testphase kannst du per Mail an join@growcentric.ai anfragen.",
+
     # Auth screens (login wall, password reset, invite-only register)
     "The growth brain for your eCommerce store" => "Das Growth Brain für deinen eCommerce Shop",
     "Sign in" => "Anmelden",
@@ -1213,6 +1217,7 @@ module GermanDictionary
     "New password" => "Neues Passwort",
     "At least %{count} characters" => "Mindestens %{count} Zeichen",
     "Confirm new password" => "Neues Passwort bestätigen",
-    "Save new password" => "Neues Passwort speichern"
+    "Save new password" => "Neues Passwort speichern",
+    "All rights reserved." => "Alle Rechte vorbehalten."
   }.freeze
 end

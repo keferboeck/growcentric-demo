@@ -6,7 +6,27 @@ class ApplicationController < ActionController::Base
 
   def switch_locale(&action)
     session[:locale] = params[:locale] if params[:locale].present? && I18n.available_locales.map(&:to_s).include?(params[:locale])
-    I18n.with_locale(session[:locale] || I18n.default_locale, &action)
+    I18n.with_locale(session[:locale] || detected_locale, &action)
+  end
+
+  # Locale resolution when the visitor has not picked a language yet:
+  #   1. Browser language (Accept-Language) when it names a language we support.
+  #   2. Geo: requests from the DACH region default to German. App Platform sits
+  #      behind Cloudflare, so the country arrives in CF-IPCountry when present.
+  #   3. English.
+  # Only the explicit flag-toggle choice is stored in the session, so changing
+  # the browser language keeps working until the visitor picks a language.
+  DACH_COUNTRIES = %w[DE AT CH LI].freeze
+
+  def detected_locale
+    supported = I18n.available_locales.map(&:to_s)
+    browser = request.headers["Accept-Language"].to_s.downcase.scan(/[a-z]{2}(?=[-;,\s]|\z)/).find { |lang| supported.include?(lang) }
+    return browser if browser
+
+    country = (request.headers["CF-IPCountry"] || request.headers["X-Country-Code"] || request.headers["X-Geo-Country"]).to_s.upcase
+    return "de" if DACH_COUNTRIES.include?(country)
+
+    I18n.default_locale.to_s
   end
 
   # Shared product filtering for the analysis pages. All filters arrive as GET
