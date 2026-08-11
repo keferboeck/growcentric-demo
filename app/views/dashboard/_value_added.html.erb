@@ -1,0 +1,130 @@
+<%
+  vb_w = 620
+  vb_h = 230
+  pad_l = 56
+  pad_r = 24
+  pad_y = 20
+  weeks = value_weekly
+  max = weeks.map { |w| w[:actual] }.max * 1.04
+  min = weeks.map { |w| w[:baseline] }.min * 0.96
+  x = ->(i) { pad_l + i.to_f / (weeks.size - 1) * (vb_w - pad_l - pad_r) }
+  y = ->(cents) { pad_y + (1 - (cents - min) / (max - min)) * (vb_h - 2 * pad_y) }
+  actual_pts = weeks.each_with_index.map { |w, i| [x.(i).round(1), y.(w[:actual]).round(1)] }
+  base_pts = weeks.each_with_index.map { |w, i| [x.(i).round(1), y.(w[:baseline]).round(1)] }
+  path = ->(pts) { pts.each_with_index.map { |(px, py), i| "#{i.zero? ? 'M' : 'L'}#{px} #{py}" }.join(" ") }
+  wedge = (actual_pts + base_pts.reverse).map { |(px, py)| "#{px},#{py}" }.join(" ")
+  rows = weeks.each_with_index.map do |w, i|
+    { x: x.(i).round(1), label: dt("Week of %{date}", date: l(w[:week], format: '%-d %b')),
+      actual: euro(w[:actual]), baseline: euro(w[:baseline]), added: euro(w[:actual] - w[:baseline]) }
+  end
+%>
+<div class="mt-8 rounded-2xl p-px bg-brand-gradient shadow-sm">
+  <div class="grid grid-cols-1 gap-6 rounded-[calc(1rem-1px)] bg-white p-6 lg:grid-cols-5">
+    <div class="lg:col-span-2">
+      <p class="text-sm font-semibold text-gray-500"><%= dt("Value added by GrowCentric") %></p>
+      <p class="mt-2 text-5xl font-semibold tracking-tight text-gray-950">+<%= euro_compact(value_added_cents) %></p>
+      <p class="mt-2 text-sm text-gray-500">
+        <span class="font-semibold text-emerald-600">+<%= number_with_precision(value_share_pct, precision: 1, separator: ",") %>%</span>
+        <%= dt("on top of the modelled baseline since the engine went live %{days} days ago.", days: value_live_days) %>
+      </p>
+      <dl class="mt-5 space-y-2">
+        <% value_breakdown.each do |label, cents| %>
+          <div class="flex items-center justify-between gap-x-3 text-sm">
+            <dt class="flex items-center gap-x-2 text-gray-600">
+              <span class="h-2 w-2 rounded-full bg-accent-400"></span><%= dt(label) %>
+            </dt>
+            <dd class="font-semibold tabular-nums">+<%= euro_compact(cents) %></dd>
+          </div>
+        <% end %>
+      </dl>
+      <p class="mt-4 text-xs leading-5 text-gray-400"><%= dt("Baseline: revenue modelled without repricing, budget shifts and new campaigns, from pre-launch trend and seasonality.") %></p>
+      <%= link_to dt("How this happened →"), value_story_path, class: "mt-3 inline-block text-sm font-semibold text-accent-600 hover:text-accent-700" %>
+    </div>
+
+    <div class="lg:col-span-3">
+      <div class="flex items-center justify-end gap-x-6 text-xs text-gray-500">
+        <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded bg-gray-950"></span><%= dt("With GrowCentric") %></span>
+        <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded" style="background:repeating-linear-gradient(90deg,#9ca3af 0 4px,transparent 4px 7px)"></span><%= dt("Baseline") %></span>
+        <span class="inline-flex items-center gap-x-2"><span class="h-2.5 w-4 rounded-sm" style="background:#b060ff26"></span><%= dt("Value added") %></span>
+      </div>
+      <div id="value-chart" class="relative mt-2" data-points="<%= rows.to_json %>">
+        <svg viewBox="0 0 <%= vb_w %> <%= vb_h %>" class="w-full" style="height:auto" role="img" aria-label="<%= dt("Weekly revenue with GrowCentric versus modelled baseline; the shaded area is the value added") %>">
+          <% y_axis_ticks(min, max).each do |tick| %>
+            <line x1="<%= pad_l %>" x2="<%= vb_w - pad_r %>" y1="<%= y.(tick).round(1) %>" y2="<%= y.(tick).round(1) %>" stroke="#f3f4f6" stroke-width="1" />
+            <text x="<%= pad_l - 8 %>" y="<%= (y.(tick) + 3).round(1) %>" text-anchor="end" class="fill-gray-400" font-size="10"><%= euro_compact(tick) %></text>
+          <% end %>
+          <% weeks.each_with_index do |w, i| %>
+            <% if w[:week].day <= 7 %>
+              <text x="<%= x.(i).round(1) %>" y="<%= vb_h - 4 %>" text-anchor="middle" class="fill-gray-400" font-size="10"><%= l(w[:week], format: "%b") %></text>
+            <% end %>
+          <% end %>
+          <polygon points="<%= wedge %>" fill="#b060ff" fill-opacity="0.15" />
+          <path d="<%= path.(base_pts) %>" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round" stroke-linecap="round" />
+          <path d="<%= path.(actual_pts) %>" fill="none" stroke="#030712" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+          <circle cx="<%= actual_pts.last[0] %>" cy="<%= actual_pts.last[1] %>" r="4" fill="#030712" stroke="#ffffff" stroke-width="2" />
+          <circle cx="<%= base_pts.last[0] %>" cy="<%= base_pts.last[1] %>" r="4" fill="#9ca3af" stroke="#ffffff" stroke-width="2" />
+          <line data-role="crosshair" x1="0" x2="0" y1="<%= pad_y - 6 %>" y2="<%= vb_h - 16 %>" stroke="#9ca3af" stroke-width="1" visibility="hidden" />
+        </svg>
+        <div data-role="tooltip" class="pointer-events-none absolute z-10 hidden min-w-44 rounded-lg bg-gray-950 px-3 py-2 text-xs text-white shadow-lg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById("value-chart");
+    if (!root || root.dataset.bound) return;
+    root.dataset.bound = "1";
+    var svg = root.querySelector("svg");
+    var crosshair = svg.querySelector('[data-role="crosshair"]');
+    var tooltip = root.querySelector('[data-role="tooltip"]');
+    var pts = JSON.parse(root.dataset.points);
+    var VB_W = <%= vb_w %>;
+    var L = { actual: "<%= dt("With GrowCentric") %>", baseline: "<%= dt("Baseline") %>", added: "<%= dt("Value added") %>" };
+
+    function row(color, dashed, name, value, strong) {
+      var r = document.createElement("div");
+      r.className = "flex items-center gap-2 py-0.5";
+      var key = document.createElement("span");
+      key.style.cssText = "display:inline-block;width:12px;height:2px;border-radius:1px;background:" +
+        (dashed ? "repeating-linear-gradient(90deg," + color + " 0 3px,transparent 3px 5px)" : color);
+      var val = document.createElement("span");
+      val.className = strong ? "font-semibold text-accent-300" : "font-semibold";
+      val.textContent = value;
+      var label = document.createElement("span");
+      label.className = "text-gray-400";
+      label.textContent = name;
+      r.append(key, val, label);
+      return r;
+    }
+
+    svg.addEventListener("pointermove", function (e) {
+      var rect = svg.getBoundingClientRect();
+      var vx = (e.clientX - rect.left) / rect.width * VB_W;
+      var nearest = pts[0], best = Infinity;
+      pts.forEach(function (p) { var d = Math.abs(p.x - vx); if (d < best) { best = d; nearest = p; } });
+      crosshair.setAttribute("x1", nearest.x);
+      crosshair.setAttribute("x2", nearest.x);
+      crosshair.setAttribute("visibility", "visible");
+      tooltip.textContent = "";
+      var head = document.createElement("div");
+      head.className = "mb-1 font-medium text-gray-300";
+      head.textContent = nearest.label;
+      tooltip.appendChild(head);
+      tooltip.appendChild(row("#a1a1aa", false, L.actual, nearest.actual, false));
+      tooltip.appendChild(row("#9ca3af", true, L.baseline, nearest.baseline, false));
+      tooltip.appendChild(row("#b060ff", false, L.added, "+" + nearest.added, true));
+      tooltip.classList.remove("hidden");
+      var px = nearest.x / VB_W * rect.width;
+      var flip = px > rect.width * 0.66;
+      tooltip.style.left = flip ? "" : (px + 14) + "px";
+      tooltip.style.right = flip ? (rect.width - px + 14) + "px" : "";
+      tooltip.style.top = Math.max(e.clientY - rect.top - 20, 4) + "px";
+    });
+    svg.addEventListener("pointerleave", function () {
+      crosshair.setAttribute("visibility", "hidden");
+      tooltip.classList.add("hidden");
+    });
+  })();
+</script>

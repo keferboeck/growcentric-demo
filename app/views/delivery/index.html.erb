@@ -1,0 +1,145 @@
+<% content_for :title, dt("Delivery & offers") %>
+
+<%= render "shared/page_header",
+    title: dt("Delivery & offers intelligence"),
+    subtitle: dt("Shipping tariffs, subscription programmes, quantity deals and season sales, captured automatically from competitor sites, because the landed price is the price that competes.") %>
+
+<dl class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("Tariff rules captured"), value: @rules_captured,
+      note: dt("across %{count} competitors, refreshed by your crawler", count: @their_rules.size) %>
+  <%= render "shared/stat_tile", label: dt("Cheaper free-shipping thresholds"), value: @lower_thresholds,
+      note: dt("competitors undercutting your €79 threshold") %>
+  <%= render "shared/stat_tile", label: dt("Subscription programmes"), value: @subscription_count,
+      note: dt("member pricing that beats list-price comparisons") %>
+  <%= render "shared/stat_tile", label: dt("Season sales tracked"), value: @sale_events.size,
+      note: dt("incl. one predicted from recurring patterns") %>
+</dl>
+
+<div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+    <h2 class="text-base font-semibold"><%= dt("Your delivery tariff") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400">velora.keferboeck.com · <%= dt("Solidus shipping profiles") %></p>
+    <ul role="list" class="mt-4 space-y-3">
+      <% @our_rules.each do |rule| %>
+        <li class="rounded-xl bg-gray-50 p-3.5 ring-1 ring-inset ring-gray-200">
+          <div class="flex items-center justify-between gap-x-2">
+            <p class="text-sm font-semibold"><%= dt(rule.label) %></p>
+            <span class="shrink-0 text-sm font-semibold tabular-nums"><%= rule.cost_cents.zero? ? dt("Free") : euro(rule.cost_cents, precision: 2) %></span>
+          </div>
+          <p class="mt-1 text-xs text-gray-500"><%= dt(rule.detail) %></p>
+          <span class="mt-2 inline-flex items-center rounded-md bg-white px-2 py-0.5 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-200"><%= dt(rule.rule_type.humanize) %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5 xl:col-span-2">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Captured competitor tariffs") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("Postcode zones, radius rules, weight and size tiers, free-shipping thresholds. The structure, not just the fee.") %></p>
+    </div>
+    <ul role="list" class="divide-y divide-gray-100">
+      <% @their_rules.each do |competitor, rules| %>
+        <li class="px-6 py-4">
+          <div class="flex items-center gap-x-3">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-600"><%= competitor.name[0, 2].upcase %></div>
+            <p class="text-sm font-semibold"><%= competitor.name %></p>
+            <span class="text-xs text-gray-400"><%= dt("captured %{time} ago", time: time_ago_in_words(rules.map(&:captured_at).max)) %></span>
+          </div>
+          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <% rules.each do |rule| %>
+              <div class="flex items-start justify-between gap-x-3 rounded-lg bg-gray-50 px-3 py-2.5 ring-1 ring-inset ring-gray-200">
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold"><%= dt(rule.label) %> <span class="ml-1 font-normal text-gray-400"><%= dt(rule.rule_type.humanize) %></span></p>
+                  <p class="mt-0.5 text-xs text-gray-500"><%= dt(rule.detail) %></p>
+                </div>
+                <span class="shrink-0 text-xs font-semibold tabular-nums"><%= rule.cost_cents.zero? ? dt("Free") : euro(rule.cost_cents, precision: 2) %></span>
+              </div>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<div class="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+  <h2 class="text-base font-semibold"><%= dt("Where shipping flips the comparison") %></h2>
+  <p class="mt-0.5 text-xs text-gray-400"><%= dt("Landed price = item + delivery. Three live examples from your catalog.") %></p>
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div class="rounded-xl border border-rose-200 bg-rose-50/60 p-4">
+      <p class="text-sm font-semibold">Beacon 1200 · <%= dt("basket") %> €109,90</p>
+      <dl class="mt-2 space-y-1 text-xs">
+        <div class="flex justify-between"><dt class="text-gray-500"><%= dt("You: €109,90 + €0 (over €79)") %></dt><dd class="font-semibold tabular-nums">€109,90</dd></div>
+        <div class="flex justify-between"><dt class="text-gray-500"><%= dt("Lichtblick: −18% + free over €29") %></dt><dd class="font-semibold tabular-nums text-rose-600">€90,12</dd></div>
+      </dl>
+      <p class="mt-2 text-xs font-medium text-rose-700"><%= dt("They win on item price and shipping: a €19,78 landed gap.") %></p>
+    </div>
+    <div class="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+      <p class="text-sm font-semibold">Frame Bag 5L · <%= dt("basket") %> €79,00</p>
+      <dl class="mt-2 space-y-1 text-xs">
+        <div class="flex justify-between"><dt class="text-gray-500"><%= dt("You: €79,00 + €0 (threshold met)") %></dt><dd class="font-semibold tabular-nums">€79,00</dd></div>
+        <div class="flex justify-between"><dt class="text-gray-500"><%= dt("Radquartier: +9,5% + free over €50") %></dt><dd class="font-semibold tabular-nums">€86,50</dd></div>
+      </dl>
+      <p class="mt-2 text-xs font-medium text-amber-700"><%= dt("You still win, but their €50 threshold beats you on any basket under €79.") %></p>
+    </div>
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+      <p class="text-sm font-semibold">Chain Doctor · <%= dt("basket") %> €29,90</p>
+      <dl class="mt-2 space-y-1 text-xs">
+        <div class="flex justify-between"><dt class="text-gray-500"><%= dt("You: €29,90 + €4,90") %></dt><dd class="font-semibold tabular-nums">€34,80</dd></div>
+        <div class="flex justify-between"><dt class="text-gray-500"><%= dt("Bikeinsel: +6% + €3,95 (<2 kg)") %></dt><dd class="font-semibold tabular-nums">€35,64</dd></div>
+      </dl>
+      <p class="mt-2 text-xs font-medium text-emerald-700"><%= dt("Narrow win. A €5 add-on nudge pushes baskets over your free threshold.") %></p>
+    </div>
+  </div>
+</div>
+
+<div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Subscription, quantity & clearance offers") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("Offer structures that change the dynamics beyond the list price.") %></p>
+    </div>
+    <ul role="list" class="divide-y divide-gray-100">
+      <% @offers.each do |offer| %>
+        <li class="px-6 py-4">
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <% badge = { "subscription" => "bg-accent-50 text-accent-700 ring-accent-600/20",
+                         "quantity"     => "bg-sky-50 text-sky-700 ring-sky-600/20",
+                         "clearance"    => "bg-amber-50 text-amber-700 ring-amber-600/20" }.fetch(offer.offer_type) %>
+            <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset <%= badge %>"><%= dt(offer.offer_type.capitalize) %></span>
+            <p class="text-sm font-semibold"><%= offer.competitor.name %> · <%= dt(offer.title) %></p>
+            <span class="text-xs text-gray-400"><%= dt("%{time} ago", time: time_ago_in_words(offer.detected_at)) %></span>
+          </div>
+          <p class="mt-1.5 text-sm text-gray-500"><%= dt(offer.detail) %></p>
+          <p class="mt-1.5 text-xs font-medium text-gray-700">⚡ <%= dt(offer.dynamics_note) %></p>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Season sales: last seasons & what's coming") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("Recurring sale patterns become predictions you can pre-empt.") %></p>
+    </div>
+    <ul role="list" class="divide-y divide-gray-100">
+      <% @sale_events.each do |event| %>
+        <li class="px-6 py-4">
+          <div class="flex flex-wrap items-center gap-x-2">
+            <p class="text-sm font-semibold"><%= event.competitor ? event.competitor.name : dt("Velora (you)") %> · <%= dt(event.title) %></p>
+            <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= dt(event.season) %></span>
+            <% if event.ended_on.nil? %>
+              <span class="inline-flex items-center rounded-md bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= dt("Predicted") %></span>
+            <% end %>
+          </div>
+          <p class="mt-1 text-xs text-gray-400">
+            <%= event.discount %> · <%= dt(event.categories) %> ·
+            <%= l(event.started_on, format: "%-d %b %Y") %><%= event.ended_on ? " – #{l(event.ended_on, format: '%-d %b %Y')}" : " →" %>
+          </p>
+          <p class="mt-1.5 text-sm text-gray-500"><%= dt(event.note) %></p>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,128 @@
+<% content_for :title, dt("Forecast") %>
+
+<%= render "shared/page_header",
+    title: dt("Revenue forecast"),
+    subtitle: dt("Where your business is heading: combining your sales history, competitive position and current advertising effort into a forward view."),
+    action_label: dt("Export report") %>
+
+<% delta = (@forecast_30d_cents - @actual_30d_cents) * 100.0 / @actual_30d_cents %>
+<dl class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <%= render "shared/stat_tile", label: dt("Next 30 days, forecast"), value: euro_compact(@forecast_30d_cents),
+      delta: signed_pct(delta), delta_positive: delta.positive?, delta_label: dt("vs last 30 days actual") %>
+  <%= render "shared/stat_tile", label: dt("Last 30 days, actual"), value: euro_compact(@actual_30d_cents),
+      note: dt("baseline the forecast is measured against") %>
+  <%= render "shared/stat_tile", label: dt("Forecast confidence"), value: "±5–12%",
+      note: dt("widens with horizon · daily granularity") %>
+</dl>
+
+<% if @early_warning %>
+  <div class="mt-6 flex items-start gap-x-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+    <svg class="mt-0.5 h-6 w-6 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+    <div>
+      <p class="text-sm font-semibold text-amber-900"><%= dt("Early warning") %> · <%= dt(@early_warning.title) %></p>
+      <p class="mt-1 text-sm leading-6 text-amber-800"><%= dt(@early_warning.body) %></p>
+      <%= link_to dt("Review corrective actions →"), recommendations_path, class: "mt-2 inline-block text-sm font-semibold text-amber-900 underline decoration-amber-400 underline-offset-4 hover:decoration-amber-600" %>
+    </div>
+  </div>
+<% end %>
+
+<div class="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+  <h2 class="text-base font-semibold"><%= dt("Daily revenue: 90 days back, 60 days forward") %></h2>
+  <div class="mt-4">
+    <%= render "shared/forecast_chart", points: @points, dom_id: "forecast-chart", height: 340 %>
+  </div>
+</div>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Weekly breakdown") %></h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3 pl-6 pr-3"><%= dt("Week of") %></th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("Actual") %></th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("Forecast") %></th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("Range") %></th>
+          <th scope="col" class="py-3 pl-3 pr-6 text-right"><%= dt("vs plan") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @weekly.last(10).each do |week| %>
+          <tr>
+            <td class="py-3 pl-6 pr-3 font-medium"><%= l(week[:week], format: "%-d %b %Y") %></td>
+            <td class="px-3 py-3 text-right tabular-nums text-gray-500"><%= week[:actual] ? euro(week[:actual]) : "-" %></td>
+            <td class="px-3 py-3 text-right tabular-nums text-gray-500"><%= euro(week[:forecast]) %></td>
+            <td class="px-3 py-3 text-right tabular-nums text-xs text-gray-400"><%= euro(week[:lower]) %> – <%= euro(week[:upper]) %></td>
+            <td class="py-3 pl-3 pr-6 text-right text-xs">
+              <% if week[:actual] %>
+                <%= trend_text((week[:actual] - week[:forecast]) * 100.0 / week[:forecast]) %>
+              <% else %>
+                <span class="text-gray-300"><%= dt("projected") %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="mt-6 rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-4">
+    <div>
+      <h2 class="text-base font-semibold"><%= dt("Forecasting models") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("Four candidates are backtested weekly on your own history. The champion produces the forecast above; challengers keep competing in the background.") %></p>
+    </div>
+    <span class="inline-flex items-center gap-x-1.5 rounded-md bg-accent-50 px-2 py-1 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20">
+      <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h4.116l-.862 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 15.25 8h-4.116l.849-6.093Z" clip-rule="evenodd" /></svg>
+      <%= dt("Champion auto-selected") %>
+    </span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3 pl-6 pr-3"><%= dt("Model") %></th>
+          <th scope="col" class="px-3 py-3"><%= dt("Approach") %></th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("MAPE 30d") %></th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("MAPE 90d") %></th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("Band coverage") %></th>
+          <th scope="col" class="py-3 pl-3 pr-6"><%= dt("Status") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <%
+          models = [
+            ["Ensemble v3", dt("Weighted blend of the three challengers, weights re-fit weekly"), "4,1%", "6,8%", "91%", :champion],
+            ["Gradient boosting", dt("Learns promo effects, weekday patterns and competitor pressure as features"), "4,6%", "7,3%", "88%", :challenger],
+            ["SARIMA", dt("Classical statistical model, strong on stable seasonality"), "5,2%", "7,9%", "93%", :challenger],
+            ["Seasonal baseline", dt("Holt-Winters smoothing; the sanity check every challenger must beat"), "6,7%", "9,4%", "86%", :baseline]
+          ]
+        %>
+        <% models.each do |name, approach, mape30, mape90, coverage, status| %>
+          <tr class="<%= 'bg-accent-50/40' if status == :champion %>">
+            <td class="py-3.5 pl-6 pr-3 font-semibold"><%= name %></td>
+            <td class="max-w-72 px-3 py-3.5 text-xs text-gray-500"><%= approach %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums <%= status == :champion ? 'font-semibold' : 'text-gray-500' %>"><%= mape30 %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums text-gray-500"><%= mape90 %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums text-gray-500"><%= coverage %></td>
+            <td class="py-3.5 pl-3 pr-6">
+              <% if status == :champion %>
+                <span class="inline-flex items-center rounded-md bg-accent-50 px-2 py-1 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= dt("Champion") %></span>
+              <% elsif status == :challenger %>
+                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= dt("Challenger") %></span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-gray-500/10"><%= dt("Baseline") %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+    <%= dt("MAPE = mean absolute percentage error on held-out weeks (lower is better). Band coverage = how often reality landed inside the confidence band (target 90%). A challenger must beat the champion on two consecutive backtests to take over; you approve the swap unless auto-apply is enabled.") %>
+  </div>
+</div>

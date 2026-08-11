@@ -1,0 +1,102 @@
+<% content_for :title, dt("Catalog content") %>
+
+<div class="md:flex md:items-center md:justify-between">
+  <div class="min-w-0 flex-1">
+    <div class="flex items-center gap-x-3">
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl"><%= dt("Catalog content") %></h1>
+      <span class="inline-flex items-center rounded-full bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-gray-950">Beta</span>
+    </div>
+    <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-500"><%= dt("The content state of every product in your Solidus store. Sherpa keeps descriptions, SEO meta and translations current; anything it cannot publish on its own lands in the queue.") %></p>
+  </div>
+  <div class="mt-4 flex md:ml-4 md:mt-0">
+    <%= link_to dt("Brand voice settings →"), settings_section_path("content"), class: "text-sm font-semibold text-accent-600 hover:text-accent-700" %>
+  </div>
+</div>
+
+<%= render "shared/product_filters", count: @products.size %>
+
+<dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("Content up to date"), value: @up_to_date,
+      note: dt("of %{count} products in this selection", count: @products.size) %>
+  <%= render "shared/stat_tile", label: dt("Drafts waiting"), value: @drafts,
+      note: dt("written by Sherpa, waiting in the queue") %>
+  <%= render "shared/stat_tile", label: dt("Needs attention"), value: @needs_work,
+      note: dt("outdated copy or missing translation") %>
+  <%= render "shared/stat_tile", label: dt("Languages"), value: "DE + EN",
+      note: dt("every product is maintained in both") %>
+</dl>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3.5 pl-6 pr-3"><%= dt("Product") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Languages") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Description") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("SEO meta") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Last updated") %></th>
+          <th scope="col" class="py-3.5 pl-3 pr-6 text-right"><%= dt("Actions") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @rows.each do |product, status, seo, updated_days| %>
+          <tr class="<%= 'bg-amber-50/40' if %i[outdated missing_en].include?(status) %>">
+            <td class="py-3.5 pl-6 pr-3">
+              <p class="font-medium text-gray-950"><%= product.name %></p>
+              <p class="mt-0.5 text-xs text-gray-400"><%= product.brand.name %> · <%= product.sku %></p>
+            </td>
+            <td class="px-3 py-3.5">
+              <div class="flex items-center gap-x-2">
+                <span class="inline-flex items-center gap-x-1 text-xs font-medium text-gray-600">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>DE
+                </span>
+                <span class="inline-flex items-center gap-x-1 text-xs font-medium <%= status == :missing_en ? 'text-gray-400' : 'text-gray-600' %>">
+                  <span class="h-1.5 w-1.5 rounded-full <%= status == :missing_en ? 'bg-gray-300' : 'bg-emerald-500' %>"></span>EN
+                </span>
+              </div>
+            </td>
+            <td class="px-3 py-3.5">
+              <% case status %>
+              <% when :up_to_date %>
+                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Up to date") %></span>
+              <% when :draft %>
+                <span class="inline-flex items-center rounded-md bg-accent-50 px-2 py-1 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= dt("Draft ready") %></span>
+              <% when :outdated %>
+                <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("Outdated: price changed") %></span>
+              <% when :missing_en %>
+                <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("EN translation missing") %></span>
+              <% end %>
+            </td>
+            <td class="px-3 py-3.5">
+              <% if seo == :testing %>
+                <span class="inline-flex items-center rounded-md bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20"><%= dt("A/B testing") %></span>
+              <% else %>
+                <span class="text-xs text-gray-400">OK</span>
+              <% end %>
+            </td>
+            <td class="px-3 py-3.5 text-xs text-gray-400"><%= dt("%{n} days ago", n: updated_days) %></td>
+            <td class="py-3.5 pl-3 pr-6">
+              <div class="flex justify-end gap-x-1.5">
+                <% case status %>
+                <% when :draft %>
+                  <%= link_to dt("Review draft"), content_queue_path, class: "rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800" %>
+                <% when :outdated %>
+                  <button type="button" class="rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Generate update") %></button>
+                <% when :missing_en %>
+                  <button type="button" class="rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Translate") %></button>
+                <% else %>
+                  <button type="button" class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Regenerate") %></button>
+                <% end %>
+                <button type="button" class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("View in store") %></button>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+    <%= dt("Every text is versioned in Solidus and revertable. Voice and formality come from your brand voice settings; the approval chain is configured there too.") %>
+  </div>
+</div>

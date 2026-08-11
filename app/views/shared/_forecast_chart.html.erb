@@ -1,0 +1,122 @@
+<%
+  vb_w = 960
+  vb_h = local_assigns.fetch(:height, 320)
+  chart = forecast_chart_data(points, width: vb_w, height: vb_h)
+  rows = points.map do |p|
+    {
+      x: chart[:x].call(p.day).round(1),
+      label: l(p.day, format: "%-d %b %Y"),
+      actual: p.actual_cents && euro(p.actual_cents),
+      forecast: p.day >= Date.current ? euro(p.forecast_cents) : nil,
+      range: p.day > Date.current ? "#{euro(p.lower_cents)} – #{euro(p.upper_cents)}" : nil
+    }
+  end
+%>
+<div id="<%= dom_id %>" class="relative" data-points="<%= rows.to_json %>">
+  <div class="mb-3 flex items-center gap-x-6 text-xs text-gray-500">
+    <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded bg-gray-950"></span><%= dt("Actual revenue") %></span>
+    <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded" style="background:repeating-linear-gradient(90deg,#b060ff 0 4px,transparent 4px 7px)"></span><%= dt("Forecast") %></span>
+    <span class="inline-flex items-center gap-x-2"><span class="h-2.5 w-4 rounded-sm" style="background:#b060ff1a"></span><%= dt("Confidence band") %></span>
+  </div>
+  <svg viewBox="0 0 <%= vb_w %> <%= vb_h %>" class="w-full" style="height:auto" role="img" aria-label="<%= dt("Daily revenue: actuals and forecast with confidence band") %>">
+    <% chart[:y_ticks].each do |tick| %>
+      <line x1="48" x2="<%= vb_w - 76 %>" y1="<%= chart[:y].call(tick).round(1) %>" y2="<%= chart[:y].call(tick).round(1) %>" stroke="#f3f4f6" stroke-width="1" />
+      <text x="40" y="<%= (chart[:y].call(tick) + 3).round(1) %>" text-anchor="end" class="fill-gray-400" font-size="11"><%= euro_compact(tick) %></text>
+    <% end %>
+    <% chart[:month_ticks].each do |(mx, label)| %>
+      <text x="<%= mx.round(1) %>" y="<%= vb_h - 2 %>" text-anchor="middle" class="fill-gray-400" font-size="11"><%= label %></text>
+    <% end %>
+
+    <!-- Today marker -->
+    <line x1="<%= chart[:today_x].round(1) %>" x2="<%= chart[:today_x].round(1) %>" y1="10" y2="<%= vb_h - 18 %>" stroke="#d1d5db" stroke-width="1" />
+    <text x="<%= chart[:today_x].round(1) %>" y="9" text-anchor="middle" class="fill-gray-400" font-size="10"><%= dt("Today") %></text>
+
+    <!-- Confidence band -->
+    <polygon points="<%= chart[:band_points] %>" fill="#b060ff" fill-opacity="0.1" />
+
+    <!-- Series -->
+    <path d="<%= chart[:actual_path] %>" fill="none" stroke="#030712" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+    <path d="<%= chart[:forecast_path] %>" fill="none" stroke="#b060ff" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round" stroke-linecap="round" />
+
+    <!-- End markers: 2px surface ring -->
+    <% la = chart[:last_actual] %>
+    <circle cx="<%= chart[:x].call(la.day).round(1) %>" cy="<%= chart[:y].call(la.actual_cents).round(1) %>" r="4" fill="#030712" stroke="#ffffff" stroke-width="2" />
+    <% lf = chart[:last_forecast] %>
+    <circle cx="<%= chart[:x].call(lf.day).round(1) %>" cy="<%= chart[:y].call(lf.forecast_cents).round(1) %>" r="4" fill="#b060ff" stroke="#ffffff" stroke-width="2" />
+
+    <!-- Direct end labels (text tokens, keyed by the mark beside them) -->
+    <text x="<%= (chart[:x].call(la.day) + 10).round(1) %>" y="<%= (chart[:y].call(la.actual_cents) - 8).round(1) %>" class="fill-gray-600" font-size="11" font-weight="600"><%= euro_compact(la.actual_cents) %></text>
+    <text x="<%= (chart[:x].call(lf.day) + 8).round(1) %>" y="<%= (chart[:y].call(lf.forecast_cents) + 4).round(1) %>" class="fill-gray-600" font-size="11" font-weight="600"><%= euro_compact(lf.forecast_cents) %></text>
+
+    <!-- Crosshair -->
+    <line data-role="crosshair" x1="0" x2="0" y1="10" y2="<%= vb_h - 18 %>" stroke="#9ca3af" stroke-width="1" visibility="hidden" />
+  </svg>
+  <div data-role="tooltip" class="pointer-events-none absolute z-10 hidden min-w-40 rounded-lg bg-gray-950 px-3 py-2 text-xs text-white shadow-lg"></div>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById("<%= dom_id %>");
+    if (!root || root.dataset.bound) return;
+    root.dataset.bound = "1";
+    var svg = root.querySelector("svg");
+    var crosshair = svg.querySelector('[data-role="crosshair"]');
+    var tooltip = root.querySelector('[data-role="tooltip"]');
+    var pts = JSON.parse(root.dataset.points);
+    var VB_W = <%= vb_w %>;
+    var L = { actual: "<%= dt("Actual") %>", forecast: "<%= dt("Forecast") %>", range: "<%= dt("Range") %>" };
+
+    function row(color, dashed, name, value) {
+      var r = document.createElement("div");
+      r.className = "flex items-center gap-2 py-0.5";
+      var key = document.createElement("span");
+      key.style.cssText = "display:inline-block;width:12px;height:2px;border-radius:1px;background:" +
+        (dashed ? "repeating-linear-gradient(90deg," + color + " 0 3px,transparent 3px 5px)" : color);
+      var val = document.createElement("span");
+      val.className = "font-semibold";
+      val.textContent = value;
+      var label = document.createElement("span");
+      label.className = "text-gray-400";
+      label.textContent = name;
+      r.append(key, val, label);
+      return r;
+    }
+
+    svg.addEventListener("pointermove", function (e) {
+      var rect = svg.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width * VB_W;
+      var nearest = pts[0], best = Infinity;
+      pts.forEach(function (p) {
+        var d = Math.abs(p.x - x);
+        if (d < best) { best = d; nearest = p; }
+      });
+      crosshair.setAttribute("x1", nearest.x);
+      crosshair.setAttribute("x2", nearest.x);
+      crosshair.setAttribute("visibility", "visible");
+
+      tooltip.textContent = "";
+      var head = document.createElement("div");
+      head.className = "mb-1 font-medium text-gray-300";
+      head.textContent = nearest.label;
+      tooltip.appendChild(head);
+      if (nearest.actual) tooltip.appendChild(row("#a1a1aa", false, L.actual, nearest.actual));
+      if (nearest.forecast) tooltip.appendChild(row("#b060ff", true, L.forecast, nearest.forecast));
+      if (nearest.range) {
+        var rng = document.createElement("div");
+        rng.className = "mt-1 text-gray-400";
+        rng.textContent = L.range + " " + nearest.range;
+        tooltip.appendChild(rng);
+      }
+      tooltip.classList.remove("hidden");
+      var px = nearest.x / VB_W * rect.width;
+      var flip = px > rect.width * 0.72;
+      tooltip.style.left = flip ? "" : (px + 14) + "px";
+      tooltip.style.right = flip ? (rect.width - px + 14) + "px" : "";
+      tooltip.style.top = Math.max(e.clientY - rect.top - 20, 8) + "px";
+    });
+    svg.addEventListener("pointerleave", function () {
+      crosshair.setAttribute("visibility", "hidden");
+      tooltip.classList.add("hidden");
+    });
+  })();
+</script>

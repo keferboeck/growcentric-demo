@@ -1,0 +1,53 @@
+<% content_for :title, dt("Sign in") %>
+
+<div class="mx-auto w-full max-w-md">
+  <div class="flex flex-col items-center">
+    <%= render "shared/mark", css: "h-14 w-14", suffix: "-auth" %>
+    <h1 class="mt-6 text-2xl font-semibold tracking-tight"><%= dt("Sign in to GrowCentric") %></h1>
+    <p class="mt-2 text-sm text-gray-500"><%= dt("Welcome back. Your shop has been busy.") %></p>
+  </div>
+
+  <div class="mt-8 rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-950/5">
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5" }) do |f| %>
+      <div>
+        <%= f.label :email, dt("Email"), class: "block text-sm font-medium text-gray-700" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email",
+              class: "mt-1.5 w-full rounded-lg border-0 bg-gray-50 px-3 py-2 text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400" %>
+      </div>
+      <div>
+        <div class="flex items-center justify-between">
+          <%= f.label :password, dt("Password"), class: "block text-sm font-medium text-gray-700" %>
+          <%= link_to dt("Forgot password?"), forgot_password_path, class: "text-sm font-medium text-accent-600 hover:text-accent-700" %>
+        </div>
+        <%= f.password_field :password, autocomplete: "current-password",
+              class: "mt-1.5 w-full rounded-lg border-0 bg-gray-50 px-3 py-2 text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400" %>
+      </div>
+      <div class="flex items-center gap-x-2.5">
+        <%= f.check_box :remember_me, checked: true, class: "h-4 w-4 rounded border-gray-300 text-accent-600 focus:ring-accent-400" %>
+        <%= f.label :remember_me, dt("Keep me signed in"), class: "text-sm text-gray-600" %>
+      </div>
+      <%= f.submit dt("Sign in"), class: "w-full cursor-pointer rounded-full bg-gray-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800" %>
+    <% end %>
+
+    <div class="mt-6 flex items-center gap-x-3">
+      <div class="h-px flex-1 bg-gray-100"></div>
+      <span class="text-xs uppercase tracking-wide text-gray-400"><%= dt("or") %></span>
+      <div class="h-px flex-1 bg-gray-100"></div>
+    </div>
+
+    <button type="button" class="mt-6 flex w-full items-center justify-center gap-x-2.5 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12.0003 4.75c1.7658 0 3.3508.6075 4.5967 1.7917l3.4275-3.4275C17.9542 1.1917 15.2359 0 12.0003 0 7.3092 0 3.2551 2.6917 1.2817 6.6083l3.9942 3.0975c.9458-2.8417 3.5992-4.9558 6.7244-4.9558Z" fill="#EA4335"/>
+        <path d="M23.49 12.275c0-.7842-.0708-1.5383-.2033-2.2658H12.0003v4.5083h6.4417c-.2775 1.4975-1.1233 2.7658-2.3925 3.6158l3.8658 3.0008c2.2575-2.0833 3.5747-5.1508 3.5747-8.8591Z" fill="#4285F4"/>
+        <path d="M5.2759 14.2942a7.213 7.213 0 0 1-.3758-2.2942c0-.7975.1367-1.5717.3758-2.2942L1.2817 6.6083A11.973 11.973 0 0 0 .0003 12c0 1.9358.4642 3.7667 1.2814 5.3917l3.9942-3.0975Z" fill="#FBBC05"/>
+        <path d="M12.0003 24c3.2358 0 5.9533-1.0625 7.9375-2.8917l-3.8658-3.0008c-1.0742.7225-2.4483 1.1425-4.0717 1.1425-3.1252 0-5.7786-2.1142-6.7244-4.9558l-3.9942 3.0975C3.2551 21.3083 7.3092 24 12.0003 24Z" fill="#34A853"/>
+      </svg>
+      <%= dt("Continue with Google") %>
+    </button>
+  </div>
+
+  <p class="mt-6 text-center text-sm text-gray-500">
+    <%= dt("New to GrowCentric?") %>
+    <%= link_to dt("Request access"), register_path, class: "font-medium text-accent-600 hover:text-accent-700" %>
+  </p>
+</div>

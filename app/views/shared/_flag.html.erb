@@ -1,0 +1,36 @@
+<%# Circular flag icons in the keferboeck.com style. Locals: country (:uk/:de), css, optional suffix for unique clip ids. %>
+<% suffix = local_assigns.fetch(:suffix, "") %>
+<% if country == :de %>
+  <svg viewBox="-4 -4 32 32" aria-hidden="true" class="<%= css %>">
+    <defs>
+      <clipPath id="deClip<%= suffix %>"><circle cx="12" cy="12" r="12" /></clipPath>
+    </defs>
+    <g clip-path="url(#deClip<%= suffix %>)">
+      <rect fill="#26292b" x="-4" y="0" width="32" height="8" />
+      <rect fill="#c12626" x="-4" y="8" width="32" height="8" />
+      <rect fill="#f0c445" x="-4" y="16" width="32" height="8" />
+    </g>
+  </svg>
+<% else %>
+  <svg viewBox="-4 -4 32 32" aria-hidden="true" class="<%= css %>">
+    <defs>
+      <clipPath id="ukClip<%= suffix %>"><circle cx="12" cy="12" r="12" /></clipPath>
+    </defs>
+    <g clip-path="url(#ukClip<%= suffix %>)">
+      <rect fill="#fff" x="-1" y="0" width="26" height="24" />
+      <polygon fill="#b92236" points="16.4 8.68 24.9 1.05 24.9 0 24.31 0 14.63 8.68 16.4 8.68" />
+      <polygon fill="#b92236" points="16 15.83 24.9 23.82 24.9 22.22 17.78 15.83 16 15.83" />
+      <polygon fill="#b92236" points="-0.85 1.82 6.77 8.68 8.55 8.68 -0.85 0.22 -0.85 1.82" />
+      <polygon fill="#b92236" points="8.14 15.83 -0.85 23.91 -0.85 24.05 0.77 24.05 9.92 15.83 8.14 15.83" />
+      <polygon fill="#2e2f7a" points="23.14 0 14.13 0 14.13 8.07 23.14 0" />
+      <polygon fill="#2e2f7a" points="10.15 0 1.16 0 10.15 8.07 10.15 0" />
+      <polygon fill="#2e2f7a" points="24.9 8.68 24.9 3.16 18.78 8.68 24.9 8.68" />
+      <polygon fill="#2e2f7a" points="24.9 21.3 24.9 15.83 18.78 15.83 24.9 21.3" />
+      <polygon fill="#2e2f7a" points="1.67 24.05 10.15 24.05 10.15 16.45 1.67 24.05" />
+      <polygon fill="#2e2f7a" points="14.13 24.05 22.64 24.05 14.13 16.45 14.13 24.05" />
+      <polygon fill="#2e2f7a" points="-0.85 15.83 -0.85 21.53 5.48 15.83 -0.85 15.83" />
+      <polygon fill="#2e2f7a" points="-0.85 8.68 5.48 8.68 -0.85 2.97 -0.85 8.68" />
+      <polygon fill="#b92236" points="10.94 0 10.94 10.12 -0.85 10.12 -0.85 14.41 10.94 14.41 10.94 24.05 13.33 24.05 13.33 14.41 24.9 14.41 24.9 10.12 13.33 10.12 13.33 0 10.94 0" />
+    </g>
+  </svg>
+<% end %>

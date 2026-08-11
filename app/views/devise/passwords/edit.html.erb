@@ -1,0 +1,30 @@
+<% content_for :title, dt("Set new password") %>
+
+<div class="mx-auto w-full max-w-md">
+  <div class="flex flex-col items-center">
+    <%= render "shared/mark", css: "h-14 w-14", suffix: "-auth" %>
+    <h1 class="mt-6 text-2xl font-semibold tracking-tight"><%= dt("Choose a new password") %></h1>
+  </div>
+
+  <div class="mt-8 rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-950/5">
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "space-y-5" }) do |f| %>
+      <%= f.hidden_field :reset_password_token %>
+      <div>
+        <%= f.label :password, dt("New password"), class: "block text-sm font-medium text-gray-700" %>
+        <%= f.password_field :password, autofocus: true, autocomplete: "new-password",
+              class: "mt-1.5 w-full rounded-lg border-0 bg-gray-50 px-3 py-2 text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400" %>
+        <p class="mt-1.5 text-xs text-gray-400"><%= dt("At least %{count} characters", count: @minimum_password_length || 6) %></p>
+      </div>
+      <div>
+        <%= f.label :password_confirmation, dt("Confirm new password"), class: "block text-sm font-medium text-gray-700" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password",
+              class: "mt-1.5 w-full rounded-lg border-0 bg-gray-50 px-3 py-2 text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400" %>
+      </div>
+      <%= f.submit dt("Save new password"), class: "w-full cursor-pointer rounded-full bg-gray-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800" %>
+    <% end %>
+  </div>
+
+  <p class="mt-6 text-center text-sm text-gray-500">
+    <%= link_to dt("Back to sign in"), new_user_session_path, class: "font-medium text-accent-600 hover:text-accent-700" %>
+  </p>
+</div>

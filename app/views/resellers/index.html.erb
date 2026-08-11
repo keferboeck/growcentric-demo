@@ -1,0 +1,184 @@
+<% content_for :title, dt("Reseller monitoring") %>
+
+<div class="md:flex md:items-center md:justify-between">
+  <div class="min-w-0 flex-1">
+    <div class="flex flex-wrap items-center gap-x-3">
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl"><%= dt("Reseller monitoring") %></h1>
+      <span class="inline-flex items-center gap-x-1.5 rounded-full bg-gray-950 px-3 py-1 text-xs font-semibold text-white">
+        <%= dt("Viewing as manufacturer:") %> LumenRide GmbH
+      </span>
+    </div>
+    <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-500"><%= dt("Every shop and marketplace selling your products, watched around the clock: advertised prices against your UVP, new sellers as they appear, and automatic notices when someone drops below your threshold.") %></p>
+  </div>
+  <div class="mt-4 flex md:ml-4 md:mt-0">
+    <%= link_to dt("UVP & notice settings →"), settings_section_path("manufacturer"), class: "text-sm font-semibold text-accent-600 hover:text-accent-700" %>
+  </div>
+</div>
+
+<dl class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("Resellers tracked"), value: 7,
+      note: dt("6 authorized · 1 unauthorized, detected 2 days ago") %>
+  <%= render "shared/stat_tile", label: dt("UVP compliance"), value: "81%",
+      delta: "-9 pt", delta_positive: false, delta_label: dt("since Lichtblick's light-set promo") %>
+  <%= render "shared/stat_tile", label: dt("Active violations"), value: 2,
+      note: dt("both below your -10% threshold, notices running") %>
+  <%= render "shared/stat_tile", label: dt("Distribution coverage"), value: "3 / 3",
+      note: dt("every SKU stocked by at least 4 resellers") %>
+</dl>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Your products in the market") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("Lowest advertised price across all tracked resellers, against your UVP and alert threshold.") %></p>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3.5 pl-6 pr-3"><%= dt("Product") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right">UVP</th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Alert threshold") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Lowest advertised") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("By") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Resellers stocking") %></th>
+          <th scope="col" class="py-3.5 pl-3 pr-6"><%= dt("Status") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <%
+          rows = [
+            ["LumenRide Beacon 1200 Front Light", "€119,90", "€107,91", "€94,30", "-21%", "Lichtblick Velo", 6, :violation],
+            ["LumenRide Pulse Rear Radar", "€199,00", "€179,10", "€169,15", "-15%", "Lichtblick Velo", 5, :violation],
+            ["LumenRide Orbit Wheel Lights", "€39,90", "€35,91", "€34,90", "-13%", "Velora Cycling Supply", 4, :watch]
+          ]
+        %>
+        <% rows.each do |name, uvp, floor, lowest, delta, by, stocking, status| %>
+          <tr class="<%= 'bg-rose-50/40' if status == :violation %>">
+            <td class="py-3.5 pl-6 pr-3 font-medium"><%= name %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums"><%= uvp %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums text-gray-500"><%= floor %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums font-semibold <%= status == :violation ? 'text-rose-600' : 'text-amber-600' %>"><%= lowest %> <span class="text-xs font-medium"><%= delta %></span></td>
+            <td class="px-3 py-3.5 text-xs text-gray-500"><%= by %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums text-gray-500"><%= stocking %> / 7</td>
+            <td class="py-3.5 pl-3 pr-6">
+              <% if status == :violation %>
+                <span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20"><%= dt("Below threshold") %></span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("Near threshold") %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+  <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5 xl:col-span-2">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Resellers") %></h2>
+    </div>
+    <ul role="list" class="divide-y divide-gray-100">
+      <%
+        resellers = [
+          ["Velora Cycling Supply", "velora.keferboeck.com", dt("Own shop"), true, 3, "-1%", :compliant, nil],
+          ["Radquartier", "radquartier.at", dt("Own shop"), true, 3, "-3%", :compliant, nil],
+          ["Bikeinsel", "bikeinsel.de", dt("Own shop"), true, 2, "-4%", :recovered, dt("Raised back above threshold 3 days ago, 26 h after notice 1")],
+          ["Lichtblick Velo", "lichtblick-velo.de", dt("Own shop"), true, 3, "-18%", :violation, dt("Below threshold for 6 days · notice 1 opened, price unchanged · notice 2 goes out tomorrow (auto)")],
+          ["Velodrom24", "velodrom24.de", dt("Own shop"), true, 1, "-2%", :compliant, nil],
+          ["Alpenrad Shop", "alpenrad.shop", dt("Own shop"), true, 2, "-5%", :watch, dt("Clearance on last season's stock, within the agreed window")],
+          ["pricehit24", dt("eBay listing"), dt("Marketplace"), false, 2, "-26%", :unauthorized, dt("Appeared 2 days ago · no distribution agreement · pricing suggests gray import")]
+        ]
+      %>
+      <% resellers.each do |name, domain, type, authorized, skus, deviation, status, note| %>
+        <li class="px-6 py-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-x-3">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg <%= status == :unauthorized ? 'bg-rose-100 text-rose-600' : 'bg-gray-100 text-gray-600' %> text-xs font-semibold"><%= name[0, 2].upcase %></div>
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-x-2">
+                  <p class="truncate text-sm font-semibold"><%= name %></p>
+                  <% if authorized %>
+                    <span class="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= dt("Authorized") %></span>
+                  <% else %>
+                    <span class="inline-flex items-center rounded-md bg-rose-50 px-1.5 py-0.5 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20"><%= dt("Unauthorized") %></span>
+                  <% end %>
+                </div>
+                <p class="truncate text-xs text-gray-400"><%= domain %> · <%= type %> · <%= dt("%{count} of your SKUs", count: skus) %></p>
+              </div>
+            </div>
+            <div class="flex shrink-0 items-center gap-x-3">
+              <div class="text-right">
+                <p class="text-sm font-semibold tabular-nums <%= status == :violation || status == :unauthorized ? 'text-rose-600' : 'text-gray-950' %>"><%= deviation %></p>
+                <p class="text-xs text-gray-400"><%= dt("vs UVP") %></p>
+              </div>
+              <% case status %>
+              <% when :compliant %>
+                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Compliant") %></span>
+              <% when :recovered %>
+                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Recovered") %></span>
+              <% when :watch %>
+                <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("Watch") %></span>
+              <% when :violation %>
+                <span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20"><%= dt("Violation") %></span>
+              <% when :unauthorized %>
+                <span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20"><%= dt("Unauthorized") %></span>
+              <% end %>
+              <div class="flex gap-x-1.5">
+                <% if status == :violation %>
+                  <button type="button" class="rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Send notice now") %></button>
+                <% elsif status == :unauthorized %>
+                  <button type="button" class="rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Request takedown") %></button>
+                <% end %>
+                <button type="button" class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("View offers") %></button>
+              </div>
+            </div>
+          </div>
+          <% if note %>
+            <p class="mt-2 text-xs leading-5 <%= status == :violation || status == :unauthorized ? 'text-rose-600' : 'text-gray-500' %>"><%= note %></p>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="space-y-6">
+    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+      <div class="border-b border-gray-100 px-6 py-4">
+        <h2 class="text-base font-semibold"><%= dt("Notices sent") %></h2>
+        <p class="mt-0.5 text-xs text-gray-400"><%= dt("Automatic emails per your notice rules. Every send and response is logged.") %></p>
+      </div>
+      <ul role="list" class="divide-y divide-gray-100">
+        <% [
+          [dt("Lichtblick Velo · Notice 1"), dt("Friendly UVP reminder · sent 2 days ago · opened, no reply"), :pending],
+          [dt("Bikeinsel · Notice 1"), dt("Friendly UVP reminder · sent 4 days ago · price back above threshold within 26 h"), :resolved],
+          [dt("pricehit24 · Takedown request"), dt("Sent to eBay VeRO yesterday · awaiting marketplace review"), :pending]
+        ].each do |title, detail, state| %>
+          <li class="px-6 py-3.5">
+            <div class="flex items-center justify-between gap-x-2">
+              <p class="text-sm font-semibold"><%= title %></p>
+              <% if state == :resolved %>
+                <span class="shrink-0 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Resolved") %></span>
+              <% else %>
+                <span class="shrink-0 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("Open") %></span>
+              <% end %>
+            </div>
+            <p class="mt-1 text-xs leading-5 text-gray-500"><%= detail %></p>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <div class="rounded-2xl bg-gray-950 p-6 text-white">
+      <h2 class="text-base font-semibold"><%= dt("Why manufacturers use this") %></h2>
+      <ul role="list" class="mt-3 space-y-2 text-sm leading-6 text-gray-300">
+        <li><%= dt("Price erosion is caught in hours, not at the quarterly review") %></li>
+        <li><%= dt("Gray-market sellers surface the day they list") %></li>
+        <li><%= dt("Notices go out automatically, with a full audit trail") %></li>
+        <li><%= dt("Distribution gaps and stock-outs per reseller, per SKU") %></li>
+      </ul>
+      <p class="mt-4 text-xs text-gray-500"><%= dt("Same crawler, same EU data posture: reseller offers of your own products, nothing else.") %></p>
+    </div>
+  </div>
+</div>

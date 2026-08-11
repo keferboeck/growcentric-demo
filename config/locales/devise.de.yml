@@ -1,0 +1,18 @@
+# Overrides for devise-i18n: the demo speaks du-Form, the gem ships Sie-Form.
+de:
+  devise:
+    failure:
+      invalid: "E-Mail-Adresse oder Passwort ist ungültig."
+      unauthenticated: "Bitte melde dich an, um fortzufahren."
+      timeout: "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an."
+      last_attempt: "Du hast noch einen Versuch, bevor dein Account gesperrt wird."
+    sessions:
+      signed_in: "Erfolgreich angemeldet."
+      signed_out: "Erfolgreich abgemeldet."
+      already_signed_out: "Du bist bereits abgemeldet."
+    passwords:
+      send_instructions: "Du bekommst in wenigen Minuten eine E-Mail mit einem Link, um dein Passwort zurückzusetzen."
+      send_paranoid_instructions: "Falls ein Account mit dieser E-Mail-Adresse existiert, bekommst du in wenigen Minuten einen Link zum Zurücksetzen deines Passworts."
+      updated: "Dein Passwort wurde geändert. Du bist jetzt angemeldet."
+      updated_not_active: "Dein Passwort wurde geändert."
+      no_token: "Diese Seite ist nur über einen Link aus einer Passwort-Reset-E-Mail erreichbar. Bitte prüfe, ob du die vollständige Adresse verwendet hast."

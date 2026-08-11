@@ -1,0 +1,145 @@
+<div class="space-y-6">
+  <div class="rounded-2xl p-px bg-brand-gradient shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 rounded-[calc(1rem-1px)] bg-white px-6 py-5">
+      <div>
+        <div class="flex items-center gap-x-2">
+          <h2 class="text-base font-semibold"><%= dt("Growth plan") %></h2>
+          <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Active") %></span>
+        </div>
+        <p class="mt-1 text-sm text-gray-500"><%= dt("€149 / month · billed yearly · renews on 1 March 2027") %></p>
+      </div>
+      <div class="flex gap-x-2">
+        <button type="button" class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Compare plans") %></button>
+        <button type="button" class="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"><%= dt("Upgrade to Scale") %></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Usage this period") %></h2>
+    </div>
+    <div class="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <% [
+        [dt("Tracked SKUs"), 16, 500, "16 / 500"],
+        [dt("Crawl credits"), 738, 1000, dt("738 / 1.000 this month")],
+        [dt("Sherpa conversations"), 47, 200, dt("47 / 200 this month")]
+      ].each do |label, used, limit, caption| %>
+        <div class="px-6 py-4">
+          <p class="text-sm text-gray-500"><%= label %></p>
+          <p class="mt-1 text-lg font-semibold tabular-nums"><%= caption %></p>
+          <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
+            <div class="h-full rounded-full bg-accent-400" style="width: <%= (used * 100.0 / limit).round(1) %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-4">
+      <div>
+        <h2 class="text-base font-semibold"><%= dt("Crawl credits") %></h2>
+        <p class="mt-0.5 text-sm text-gray-500"><%= dt("One credit = one competitor page visit by your crawler. Your plan refills monthly; top-ups never expire.") %></p>
+      </div>
+      <button type="button" class="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"><%= dt("Buy crawl credits") %></button>
+    </div>
+    <div class="px-6 py-5">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <p class="text-sm text-gray-500"><%= dt("Used this month") %></p>
+        <p class="text-sm tabular-nums text-gray-500"><span class="text-lg font-semibold text-gray-950">738</span> / 1.000 <%= dt("included") %> <span class="text-gray-400">+ 250 <%= dt("top-up remaining") %></span></p>
+      </div>
+      <div class="mt-2 flex h-2 overflow-hidden rounded-full bg-gray-100">
+        <div class="h-full rounded-l-full bg-accent-400" style="width: 59%"></div>
+        <div class="h-full bg-brand-pink/60" style="width: 14.8%"></div>
+      </div>
+      <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-400">
+        <p><span class="inline-block h-2 w-2 rounded-full bg-accent-400 align-middle"></span> <%= dt("Plan credits") %> · <span class="inline-block h-2 w-2 rounded-full bg-brand-pink/60 align-middle"></span> <%= dt("Top-up credits") %></p>
+        <p class="font-medium text-amber-600"><%= dt("At the current cadence (6 h) your included credits last until ~24 August. Top-up credits cover the rest of the month.") %></p>
+      </div>
+      <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <% [
+          ["500", "€19", dt("€0,038 per crawl")],
+          ["2.000", "€59", dt("€0,030 per crawl · most popular")],
+          ["10.000", "€199", dt("€0,020 per crawl")]
+        ].each_with_index do |(amount, price, note), i| %>
+          <button type="button" class="rounded-xl border <%= i == 1 ? 'border-accent-300 bg-accent-50/50 ring-1 ring-accent-300' : 'border-gray-200' %> px-4 py-3 text-left hover:border-accent-300">
+            <p class="text-sm font-semibold"><%= amount %> <%= dt("credits") %> · <%= price %></p>
+            <p class="mt-0.5 text-xs text-gray-500"><%= note %></p>
+          </button>
+        <% end %>
+      </div>
+      <div class="mt-4 border-t border-gray-100 pt-1">
+        <%= render "settings/toggle_row", on: true,
+            label: dt("Auto top-up"),
+            description: dt("Buy the 500 pack automatically when fewer than 10% of monthly credits remain. Capped at two top-ups per month.") %>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Plans") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("Crawl allowance is the main difference: how much market awareness your plan includes.") %></p>
+    </div>
+    <div class="grid grid-cols-1 divide-y divide-gray-100 px-6 py-5 sm:grid-cols-3 sm:gap-4 sm:divide-y-0 sm:px-6">
+      <% [
+        ["Starter", "€49", dt("250 crawls / month"), dt("100 SKUs · daily crawl · briefing only"), false],
+        ["Growth", "€149", dt("1.000 crawls / month"), dt("500 SKUs · 6 h cadence · Sherpa included"), true],
+        ["Scale", "€399", dt("5.000 crawls / month"), dt("Unlimited SKUs · hourly cadence · priority crawler"), false]
+      ].each do |name, price, crawls, features, current| %>
+        <div class="rounded-xl <%= current ? 'border border-accent-300 bg-accent-50/50 ring-1 ring-accent-300' : 'border border-gray-200' %> p-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold"><%= name %></p>
+            <% if current %>
+              <span class="inline-flex items-center rounded-md bg-accent-100 px-1.5 py-0.5 text-xs font-medium text-accent-700"><%= dt("Current plan") %></span>
+            <% end %>
+          </div>
+          <p class="mt-1 text-2xl font-semibold tracking-tight"><%= price %><span class="text-sm font-medium text-gray-400"> / <%= dt("month") %></span></p>
+          <p class="mt-2 text-sm font-semibold text-accent-700"><%= crawls %></p>
+          <p class="mt-1 text-xs leading-5 text-gray-500"><%= features %></p>
+          <% unless current %>
+            <button type="button" class="mt-3 w-full rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= name == "Starter" ? dt("Downgrade") : dt("Upgrade") %></button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+      <%= dt("Pay as you go on every plan: top-up packs fill the gap between plan sizes, so nobody is forced to upgrade for one busy month.") %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Payment method") %></h2>
+      <button type="button" class="text-sm font-medium text-accent-600 hover:text-accent-700"><%= dt("Change") %></button>
+    </div>
+    <div class="flex items-center gap-x-3 px-6 py-4">
+      <div class="flex h-8 w-12 items-center justify-center rounded border border-gray-200 text-[10px] font-bold tracking-wide text-gray-500">VISA</div>
+      <div>
+        <p class="text-sm font-semibold">•••• 6411</p>
+        <p class="text-xs text-gray-400"><%= dt("Expires 08/2028 · Velora Cycling Supply e.U.") %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Invoices") %></h2>
+    </div>
+    <ul role="list" class="divide-y divide-gray-100">
+      <% [["2026-0812", dt("1 August 2026"), "€149,00"], ["2026-0711", dt("1 July 2026"), "€149,00"], ["2026-0610", dt("1 June 2026"), "€149,00"]].each do |number, date, amount| %>
+        <li class="flex items-center justify-between px-6 py-3.5 text-sm">
+          <div class="flex items-center gap-x-4">
+            <p class="font-semibold tabular-nums"><%= number %></p>
+            <p class="text-gray-500"><%= date %></p>
+          </div>
+          <div class="flex items-center gap-x-4">
+            <p class="tabular-nums font-medium"><%= amount %></p>
+            <button type="button" class="text-sm font-medium text-accent-600 hover:text-accent-700">PDF</button>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

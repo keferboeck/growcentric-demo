@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="<%= I18n.locale %>" class="h-full bg-gray-50">
+  <head>
+    <title><%= content_for(:title) || "GrowCentric" %> · GrowCentric</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="h-full text-gray-950 antialiased">
+    <div class="relative flex min-h-full flex-col overflow-hidden">
+      <%# Soft brand glow behind the card, in line with the demo's gradient accents. %>
+      <div aria-hidden="true" class="pointer-events-none absolute -top-40 left-1/2 h-[36rem] w-[72rem] -translate-x-1/2 rounded-full bg-brand-gradient opacity-20 blur-3xl"></div>
+
+      <div class="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+        <%= render "shared/locale_switcher" %>
+      </div>
+
+      <main class="relative flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div class="mx-auto w-full max-w-md">
+          <%= render "shared/flash" %>
+        </div>
+        <%= yield %>
+      </main>
+
+      <footer class="relative pb-8 text-center text-xs text-gray-400">
+        <p>&copy; <%= Date.current.year %> GrowCentric.ai · <%= dt("The growth brain for your eCommerce store") %></p>
+      </footer>
+    </div>
+  </body>
+</html>

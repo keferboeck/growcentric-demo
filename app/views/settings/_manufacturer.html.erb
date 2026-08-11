@@ -1,0 +1,99 @@
+<div class="space-y-6">
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-4">
+      <div>
+        <h2 class="text-base font-semibold"><%= dt("Manufacturer mode") %></h2>
+        <p class="mt-0.5 text-sm text-gray-500"><%= dt("Track the shops that sell your products instead of the shops you compete with. Both modes can run side by side.") %></p>
+      </div>
+      <span class="inline-flex items-center rounded-full bg-gray-950 px-3 py-1 text-xs font-semibold text-white">LumenRide GmbH</span>
+    </div>
+    <div class="divide-y divide-gray-100 px-6">
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Manufacturer mode enabled"),
+          description: dt("Adds reseller monitoring for the 3 LumenRide SKUs. Merchant features stay untouched.") %>
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Discover new resellers automatically"),
+          description: dt("Google Shopping and marketplace scans surface every shop listing your products, authorized or not.") %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("UVP & alert thresholds") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("Per product: your recommended price and how far below it a reseller may advertise before alerts and notices fire.") %></p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead>
+          <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <th scope="col" class="py-3 pl-6 pr-3"><%= dt("Product") %></th>
+            <th scope="col" class="px-3 py-3 text-right">UVP</th>
+            <th scope="col" class="px-3 py-3 text-right"><%= dt("Threshold below UVP") %></th>
+            <th scope="col" class="py-3 pl-3 pr-6 text-right"><%= dt("Resulting floor") %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% [["LumenRide Beacon 1200 Front Light", "119,90", "10", "€107,91"],
+              ["LumenRide Pulse Rear Radar", "199,00", "10", "€179,10"],
+              ["LumenRide Orbit Wheel Lights", "39,90", "10", "€35,91"]].each do |name, uvp, threshold, floor| %>
+            <tr>
+              <td class="py-3 pl-6 pr-3 font-medium"><%= name %></td>
+              <td class="px-3 py-3 text-right">
+                <div class="inline-flex items-center gap-x-1">
+                  <span class="text-gray-400">€</span>
+                  <input type="text" value="<%= uvp %>" class="w-20 rounded-lg border-0 bg-gray-50 px-2 py-1.5 text-right text-sm font-semibold tabular-nums ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400">
+                </div>
+              </td>
+              <td class="px-3 py-3 text-right">
+                <div class="inline-flex items-center gap-x-1">
+                  <span class="text-gray-400">-</span>
+                  <input type="number" value="<%= threshold %>" class="w-16 rounded-lg border-0 bg-gray-50 px-2 py-1.5 text-right text-sm font-semibold tabular-nums ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400">
+                  <span class="text-gray-400">%</span>
+                </div>
+              </td>
+              <td class="py-3 pl-3 pr-6 text-right tabular-nums text-gray-500"><%= floor %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <div class="flex justify-end border-t border-gray-100 px-6 py-4">
+      <button type="button" class="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"><%= dt("Save changes") %></button>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Automatic notices") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("What happens when a reseller advertises below your threshold.") %></p>
+    </div>
+    <div class="divide-y divide-gray-100 px-6">
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Send notice 1 automatically"),
+          description: dt("Friendly UVP reminder, sent after the deviation persists for 24 hours. Template below.") %>
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Escalate to notice 2 after 72 hours"),
+          description: dt("Formal deviation notice, CC to your account manager for that reseller.") %>
+      <%= render "settings/toggle_row", on: false,
+          label: dt("Notice 3: escalate to management"),
+          description: dt("Currently manual: after two ignored notices the case lands in your morning briefing instead.") %>
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Alert on new unauthorized sellers"),
+          description: dt("Immediate email and Slack alert, with a prepared marketplace takedown request.") %>
+      <div class="flex items-center justify-between gap-x-6 py-4">
+        <div>
+          <p class="text-sm font-semibold"><%= dt("Notice template") %></p>
+          <p class="mt-0.5 text-sm text-gray-500"><%= dt("Written by Sherpa in your brand voice, per language of the reseller.") %></p>
+        </div>
+        <select class="rounded-lg border-0 bg-gray-50 py-1.5 pl-3 pr-8 text-sm font-semibold ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400">
+          <option selected><%= dt("Friendly UVP reminder") %></option>
+          <option><%= dt("Formal deviation notice") %></option>
+          <option><%= dt("Custom template") %></option>
+        </select>
+      </div>
+    </div>
+    <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs leading-5 text-gray-500">
+      <%= dt("Legal note: the default templates inform resellers about the deviation from your recommended price (UVP). In the EU, binding minimum resale prices are not enforceable; review your escalation wording with counsel.") %>
+    </div>
+  </div>
+</div>

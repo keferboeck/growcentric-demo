@@ -1,0 +1,96 @@
+<div class="space-y-6">
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-4">
+      <div>
+        <h2 class="text-base font-semibold"><%= dt("Solidus API") %></h2>
+        <p class="mt-0.5 text-sm text-gray-500"><%= dt("The connection GrowCentric uses to read your catalog and orders and to write prices and content.") %></p>
+      </div>
+      <span class="inline-flex items-center gap-x-1.5 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span><%= dt("Connected · 142 ms") %>
+      </span>
+    </div>
+    <div class="space-y-4 px-6 py-5">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label class="text-sm font-semibold"><%= dt("Store URL") %></label>
+          <input type="text" value="https://velora.keferboeck.com" class="mt-1.5 w-full rounded-lg border-0 bg-gray-50 px-3 py-2 font-mono text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400">
+        </div>
+        <div>
+          <label class="text-sm font-semibold"><%= dt("API version") %></label>
+          <select class="mt-1.5 w-full rounded-lg border-0 bg-gray-50 px-3 py-2 text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400">
+            <option selected>Solidus API v2 (JSON:API)</option>
+            <option>Solidus API v1 (legacy)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold"><%= dt("API token") %></label>
+          <div class="mt-1.5 flex gap-x-2">
+            <input type="password" value="sk_live_9f2c4a7b81e3" class="w-full rounded-lg border-0 bg-gray-50 px-3 py-2 font-mono text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400" readonly>
+            <button type="button" class="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Rotate") %></button>
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-semibold"><%= dt("Webhook secret") %></label>
+          <div class="mt-1.5 flex gap-x-2">
+            <input type="password" value="whsec_4d1a88c02b" class="w-full rounded-lg border-0 bg-gray-50 px-3 py-2 font-mono text-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400" readonly>
+            <button type="button" class="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Reveal") %></button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="text-sm font-semibold"><%= dt("Granted scopes") %></p>
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          <% ["read:orders", "read:products", "read:stock", "write:prices", "write:promotions"].each do |scope| %>
+            <span class="rounded-md bg-gray-50 px-2 py-1 font-mono text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200"><%= scope %></span>
+          <% end %>
+          <span class="inline-flex items-center gap-x-1 rounded-md bg-accent-50 px-2 py-1 font-mono text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20">write:content <span class="rounded-full bg-brand-gradient px-1.5 text-[9px] font-bold uppercase text-gray-950">Beta</span></span>
+        </div>
+      </div>
+      <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+        <p class="text-xs text-gray-400"><%= dt("Last successful call 26 seconds ago · 0 errors in 24 h · rate limit 34/120 rpm") %></p>
+        <button type="button" class="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"><%= dt("Test connection") %></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-4">
+      <div>
+        <h2 class="text-base font-semibold"><%= dt("Synced products") %></h2>
+        <p class="mt-0.5 text-sm text-gray-500"><%= dt("%{count} products imported from Solidus. Prices flow back through the same connection.", count: @products.size) %></p>
+      </div>
+      <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Sync now") %></button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead>
+          <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <th scope="col" class="py-3 pl-6 pr-3"><%= dt("Product") %></th>
+            <th scope="col" class="px-3 py-3">SKU</th>
+            <th scope="col" class="px-3 py-3 text-right"><%= dt("Price") %></th>
+            <th scope="col" class="px-3 py-3"><%= dt("Last sync") %></th>
+            <th scope="col" class="py-3 pl-3 pr-6"><%= dt("Status") %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @products.each do |product| %>
+            <tr>
+              <td class="py-3 pl-6 pr-3">
+                <p class="font-medium"><%= product.name %></p>
+                <p class="text-xs text-gray-400"><%= product.brand.name %></p>
+              </td>
+              <td class="px-3 py-3 font-mono text-xs text-gray-500"><%= product.sku %></td>
+              <td class="px-3 py-3 text-right tabular-nums"><%= euro(product.price_cents, precision: 2) %></td>
+              <td class="px-3 py-3 text-xs text-gray-400"><%= dt("14 min ago") %></td>
+              <td class="py-3 pl-3 pr-6">
+                <span class="inline-flex items-center gap-x-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                  <span class="h-1 w-1 rounded-full bg-emerald-500"></span><%= dt("Synced") %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,212 @@
+<% content_for :title, "Sherpa" %>
+
+<div class="md:flex md:items-center md:justify-between">
+  <div class="min-w-0 flex-1">
+    <div class="flex items-center gap-x-3">
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">Sherpa</h1>
+      <span class="inline-flex items-center rounded-full bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-gray-950">Beta</span>
+    </div>
+    <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-500"><%= dt("Your AI growth copilot. Sherpa reads every signal in GrowCentric, explains what is happening in plain language, and drafts the work you would otherwise do by hand. Ask it anything about your shop, your market or your money.") %></p>
+  </div>
+</div>
+
+<div class="mt-6 flex items-start gap-x-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 px-5 py-4">
+  <svg class="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+  </svg>
+  <div class="text-sm leading-6">
+    <p class="font-semibold text-emerald-900"><%= dt("Private by design. Your shop data never reaches a third-party AI cloud.") %></p>
+    <p class="mt-0.5 text-emerald-800"><%= dt("Sherpa runs on GrowCentric's own language model: open-weights, fine-tuned for commerce, hosted in our EU data centre. Nothing is sent to external AI providers, and nothing you say or sell is used to train anyone's foundation model. GDPR-first, like everything else here.") %></p>
+  </div>
+</div>
+
+<div class="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+  <!-- Chat -->
+  <div class="flex flex-col rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5 xl:col-span-2">
+    <div class="flex-1 space-y-6 px-6 py-6">
+
+      <div class="flex justify-end gap-x-3">
+        <div class="max-w-xl rounded-2xl rounded-tr-sm bg-gray-950 px-4 py-3 text-sm leading-6 text-white">
+          <%= dt("Why is Lights & Electronics heading into decline?") %>
+        </div>
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-950 text-xs font-semibold text-white">GK</div>
+      </div>
+
+      <div class="flex gap-x-3">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-gray-950/10">
+          <%= render "shared/mark", css: "h-5 w-5", suffix: "-chat" %>
+        </div>
+        <div class="max-w-xl space-y-3">
+          <div class="rounded-2xl rounded-tl-sm bg-gray-50 px-4 py-3 text-sm leading-6 text-gray-700 ring-1 ring-inset ring-gray-200">
+            <p><%= dt("Three forces are stacking up on the same category:") %></p>
+            <ol class="mt-2 list-decimal space-y-1.5 pl-4">
+              <li><span class="font-semibold">Lichtblick Velo</span> <%= dt("undercut Beacon 1200 by 18% on 9 core queries and now sponsors the same audience on Meta and TikTok.") %></li>
+              <li><%= raw dt("Their front + rear <span class=\"font-semibold\">light set beats your Beacon + Pulse combination by €38</span>, so even loyal comparison shoppers leave.") %></li>
+              <li><%= raw dt("Your Lights core campaign returns 3,8× ROAS but only <span class=\"font-semibold\">0,76× POAS</span> at the category's compressed 20% margin, so the more you spend, the more you lose.") %></li>
+            </ol>
+            <p class="mt-2"><%= dt("Forecast puts the category 14% below plan by mid-September. The corrective plan already staged (shift €1.800 to Bikepacking, approve the €99,90 Beacon step) offsets roughly 70% of the projected decline.") %></p>
+          </div>
+          <div class="flex flex-wrap gap-1.5 text-xs">
+            <%= link_to dt("Forecast →"), forecast_path, class: "rounded-md bg-white px-2 py-1 font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20 hover:bg-accent-50" %>
+            <%= link_to dt("Competitors →"), competitors_path, class: "rounded-md bg-white px-2 py-1 font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20 hover:bg-accent-50" %>
+            <%= link_to dt("Campaigns →"), campaigns_path, class: "rounded-md bg-white px-2 py-1 font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20 hover:bg-accent-50" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-x-3">
+        <div class="max-w-xl rounded-2xl rounded-tr-sm bg-gray-950 px-4 py-3 text-sm leading-6 text-white">
+          <%= dt("If I could only do one thing today, what should it be?") %>
+        </div>
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-950 text-xs font-semibold text-white">GK</div>
+      </div>
+
+      <div class="flex gap-x-3">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-gray-950/10">
+          <%= render "shared/mark", css: "h-5 w-5", suffix: "-chat" %>
+        </div>
+        <div class="max-w-xl space-y-3">
+          <div class="rounded-2xl rounded-tl-sm bg-gray-50 px-4 py-3 text-sm leading-6 text-gray-700 ring-1 ring-inset ring-gray-200">
+            <p><%= raw dt("<span class=\"font-semibold\">Approve the pending Beacon 1200 reprice to €99,90.</span> It is the single action with the largest modelled impact: it restores price competitiveness on your highest-traffic light, unblocks the paused ad decision, and the floor check leaves €10 of margin headroom (cost + 25% = €89,90). Modelled effect: <span class=\"font-semibold text-emerald-600\">+€2.300/month</span> against the decline scenario.") %></p>
+            <p class="mt-2"><%= dt("I have kept it in review because it crosses your 5%-per-day guardrail twice in one week. One click and the engine handles the rest, including the Merchant Center and Meta catalog sync.") %></p>
+          </div>
+          <div class="flex gap-x-2">
+            <%= link_to dt("Review reprice →"), dynamic_pricing_path, class: "rounded-full bg-gray-950 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-gray-800" %>
+            <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Remind me tomorrow") %></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Composer -->
+    <div class="border-t border-gray-100 px-6 py-4">
+      <div class="flex flex-wrap gap-1.5">
+        <% [dt("Which price wars are worth fighting?"), dt("Draft ad copy for Orbit Wheel Lights"), dt("Which products can take a price increase?"), dt("Summarise competitor moves this week"), dt("Plan my response to Radquartier's August sale")].each do |chip| %>
+          <button type="button" data-role="chip" class="rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-accent-50 hover:text-accent-700"><%= chip %></button>
+        <% end %>
+      </div>
+      <div class="mt-3 flex items-center gap-x-2">
+        <input id="sherpa-input" type="text" placeholder="<%= dt("Ask Sherpa about your shop, your market or your money…") %>"
+               class="w-full rounded-full border-0 bg-gray-50 px-4 py-2.5 text-sm text-gray-950 ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-accent-400">
+        <button type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-950 text-white hover:bg-gray-800">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>
+        </button>
+      </div>
+      <p class="mt-2 text-xs text-gray-400"><%= dt("Sherpa reads the same signals as every page here: derived competitive indices, your Solidus order stream and campaign APIs. It never sees raw competitor prices, and every conversation stays on GrowCentric's own EU-hosted model.") %></p>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div class="space-y-6">
+    <div class="rounded-2xl p-px bg-brand-gradient shadow-sm">
+      <div class="rounded-[calc(1rem-1px)] bg-white p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold"><%= dt("Morning briefing") %></h2>
+          <span class="text-xs text-gray-400"><%= l(Date.current, format: "%-d %B %Y") %> · 07:00</span>
+        </div>
+        <ul role="list" class="mt-3 space-y-2.5 text-sm leading-6 text-gray-600">
+          <li class="flex gap-x-2"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400"></span><p><%= raw dt("Overnight crawl picked up <span class=\"font-semibold\">%{count} competitor moves</span>; the only one that matters is Lichtblick extending its light-set discount.", count: @overnight_signals) %></p></li>
+          <li class="flex gap-x-2"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400"></span><p><%= raw dt("The engine auto-repriced <span class=\"font-semibold\">%{count} SKU(s)</span> inside guardrails; nothing needed your sign-off.", count: @auto_repriced) %></p></li>
+          <li class="flex gap-x-2"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400"></span><p><%= raw dt("<span class=\"font-semibold\">%{decisions} decisions</span> waiting for review, <span class=\"font-semibold\">%{shifts} budget shifts</span> suggested. Biggest lever: the Beacon reprice.", decisions: @pending_decisions.size, shifts: @suggested_shifts) %></p></li>
+          <li class="flex gap-x-2"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400"></span><p><%= dt("Forecast nudged up 0,4% on strong bikepacking weekend sales. No early warnings changed.") %></p></li>
+        </ul>
+        <ul role="list" class="mt-2.5 space-y-2.5 text-sm leading-6 text-gray-600">
+          <li class="flex gap-x-2"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400"></span><p><%= raw dt("Heat check: <span class=\"font-semibold\">Vista Commuter Helmet jumped to 72</span>. Three competitors changed prices 9 times in 14 days while your price sat still. You have not focused on this product; options are prepared.") %></p></li>
+        </ul>
+        <div class="mt-4 rounded-xl border border-accent-200 bg-accent-50/60 p-3.5">
+          <div class="flex items-center gap-x-2">
+            <svg class="h-4 w-4 text-accent-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h4.116l-.862 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 15.25 8h-4.116l.849-6.093Z" clip-rule="evenodd" /></svg>
+            <p class="text-xs font-semibold text-accent-800"><%= dt("Staged auto-reaction") %></p>
+          </div>
+          <p class="mt-1.5 text-sm leading-6 text-gray-700"><%= dt("Lichtblick extended its light-set discount. I have prepared a counter: your own Beacon + Pulse bundle at €289 (saves the customer €25,80, holds 31% margin) plus a matching ad asset. Waiting for your approval because auto-react is off in your settings.") %></p>
+          <div class="mt-2.5 flex flex-wrap items-center gap-2">
+            <button type="button" class="rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Approve counter-bundle") %></button>
+            <button type="button" class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("View full plan") %></button>
+            <%= link_to dt("Automation settings →"), settings_section_path("automation"), class: "text-xs font-semibold text-accent-600 hover:text-accent-700" %>
+          </div>
+        </div>
+        <p class="mt-3 text-xs text-gray-400"><%= dt("Also sent to georg@keferboeck.com and #velora-growth on Slack.") %></p>
+      </div>
+    </div>
+
+    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+      <div class="border-b border-gray-100 px-5 py-4">
+        <h2 class="text-sm font-semibold"><%= dt("Price-war advisories") %></h2>
+        <p class="mt-0.5 text-xs text-gray-400"><%= dt("Based on competitive heat: who responds to your moves, and how fast.") %></p>
+      </div>
+      <ul role="list" class="divide-y divide-gray-100">
+        <li class="px-5 py-4">
+          <div class="flex items-center gap-x-2">
+            <span class="rounded-md bg-rose-50 px-1.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/20"><%= dt("Engage") %></span>
+            <p class="text-sm font-semibold">Beacon 1200 · <%= dt("heat") %> 94</p>
+          </div>
+          <p class="mt-1 text-xs leading-5 text-gray-500"><%= dt("Worth fighting: it is their bestseller too, but you have the brand, the bundle counter and €10 of floor headroom. Fight with the plan, not with panic cuts.") %></p>
+        </li>
+        <li class="px-5 py-4">
+          <div class="flex items-center gap-x-2">
+            <span class="rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-600"><%= dt("Stay out") %></span>
+            <p class="text-sm font-semibold">Gravel Tyre 45c · <%= dt("heat") %> 88</p>
+          </div>
+          <p class="mt-1 text-xs leading-5 text-gray-500"><%= dt("Velodrom24 matches within 4 hours and your 24% margin cannot win a race. Every cut here buys you nothing but a faster spiral.") %></p>
+        </li>
+        <li class="px-5 py-4">
+          <div class="flex items-center gap-x-2">
+            <span class="rounded-md bg-amber-50 px-1.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("Take a look") %></span>
+            <p class="text-sm font-semibold">Vista Commuter · <%= dt("heat") %> 72 ↗</p>
+          </div>
+          <p class="mt-1 text-xs leading-5 text-gray-500"><%= dt("A lot is happening around a product you are not watching: 9 competitor price moves in 14 days. Demand shift or a clearance war; either way, worth a look.") %></p>
+          <%= link_to dt("Open heat analysis →"), price_position_path, class: "mt-1.5 inline-block text-xs font-semibold text-accent-600 hover:text-accent-700" %>
+        </li>
+      </ul>
+    </div>
+
+    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+      <div class="border-b border-gray-100 px-5 py-4">
+        <h2 class="text-sm font-semibold"><%= dt("Drafts waiting for you") %></h2>
+        <p class="mt-0.5 text-xs text-gray-400"><%= dt("Work Sherpa prepared overnight. Nothing goes out without your approval.") %></p>
+      </div>
+      <ul role="list" class="divide-y divide-gray-100">
+        <li class="px-5 py-4">
+          <p class="text-sm font-semibold"><%= dt("3 TikTok hooks for the Orbit UGC test") %></p>
+          <p class="mt-1 text-xs leading-5 text-gray-500"><%= dt("Built on the winning \"night commute safety\" angle; each under 3 seconds to the product shot, sized for the €9,80 CPA target.") %></p>
+          <button type="button" class="mt-2 text-xs font-semibold text-accent-600 hover:text-accent-700"><%= dt("Review draft →") %></button>
+        </li>
+        <li class="px-5 py-4">
+          <p class="text-sm font-semibold"><%= dt("Counter-plan for Radquartier's August sale") %></p>
+          <p class="mt-1 text-xs leading-5 text-gray-500"><%= dt("Their season-end sale has started around 15 August two years running. Draft: your clearance one week earlier, apparel and helmets only, protected margins per SKU.") %></p>
+          <button type="button" class="mt-2 text-xs font-semibold text-accent-600 hover:text-accent-700"><%= dt("Review draft →") %></button>
+        </li>
+        <li class="px-5 py-4">
+          <p class="text-sm font-semibold"><%= dt("Supplier email: LumenRide purchase prices") %></p>
+          <p class="mt-1 text-xs leading-5 text-gray-500"><%= dt("The 20% category margin is the real bottleneck behind the lights decline. Drafted a renegotiation email citing your 440 units/month volume and the competitive context.") %></p>
+          <button type="button" class="mt-2 text-xs font-semibold text-accent-600 hover:text-accent-700"><%= dt("Review draft →") %></button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="rounded-2xl bg-gray-950 p-5 text-white">
+      <h2 class="text-sm font-semibold"><%= dt("What Sherpa can do") %></h2>
+      <ul role="list" class="mt-3 space-y-2 text-sm leading-6 text-gray-300">
+        <li><%= dt("Explain any number on any page, with sources") %></li>
+        <li><%= dt("Draft ad copy, sale plans and supplier emails") %></li>
+        <li><%= dt("Simulate: \"what if I match Lichtblick's price?\"") %></li>
+        <li><%= dt("Watch for patterns and brief you every morning") %></li>
+      </ul>
+      <p class="mt-3 text-xs text-gray-500"><%= dt("Beta: answers can be wrong. Every action stays behind your approval.") %></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var input = document.getElementById("sherpa-input");
+    if (!input || input.dataset.bound) return;
+    input.dataset.bound = "1";
+    document.querySelectorAll('[data-role="chip"]').forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        input.value = chip.textContent.trim();
+        input.focus();
+      });
+    });
+  })();
+</script>

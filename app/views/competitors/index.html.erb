@@ -1,0 +1,148 @@
+<% content_for :title, dt("Competitors") %>
+
+<%= render "shared/page_header",
+    title: dt("Competitive landscape"),
+    subtitle: dt("Competitors discovered from Google Shopping: who is spending money to win your customers, and where you stand on every contested product."),
+    action_label: dt("Add competitor") %>
+
+<dl class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("Competitors discovered"), value: @competitors.size,
+      note: dt("%{count} pinned by you", count: @pinned_count) %>
+  <%= render "shared/stat_tile", label: dt("Actively sponsoring"), value: @sponsored_count,
+      note: dt("bidding on your product queries right now") %>
+  <%= render "shared/stat_tile", label: dt("You win on"), value: "#{@better_signals} SKUs",
+      note: dt("better price or value than the market") %>
+  <%= render "shared/stat_tile", label: dt("You lose on"), value: "#{@worse_signals} SKUs",
+      note: dt("competitors undercut or out-bundle you") %>
+</dl>
+
+<div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+  <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5 xl:col-span-2">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Discovered competitors") %></h2>
+    </div>
+    <ul role="list" class="divide-y divide-gray-100">
+      <% @competitors.each do |competitor| %>
+        <li class="flex items-center gap-x-4 px-6 py-4">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-600"><%= competitor.name[0, 2].upcase %></div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-x-2">
+              <p class="truncate text-sm font-semibold"><%= competitor.name %></p>
+              <% if competitor.pinned %>
+                <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor" aria-label="Pinned"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd" /></svg>
+              <% end %>
+            </div>
+            <p class="truncate text-xs text-gray-400"><%= competitor.domain %> · <%= dt("discovered via %{source}", source: competitor.discovery_source == "manual" ? dt("manually") : "Google Shopping") %> · <%= dt("#{competitor.level} level") %></p>
+          </div>
+          <div class="hidden shrink-0 text-right sm:block">
+            <p class="text-sm font-medium tabular-nums"><%= competitor.product_overlap %></p>
+            <p class="text-xs text-gray-400"><%= dt("overlapping SKUs") %></p>
+          </div>
+          <div class="shrink-0">
+            <% if competitor.sponsored %>
+              <span class="inline-flex items-center gap-x-1.5 rounded-md bg-brand-pink/10 px-2 py-1 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-600/20">
+                <span class="h-1.5 w-1.5 rounded-full bg-brand-pink"></span><%= dt("Sponsoring") %>
+              </span>
+            <% else %>
+              <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= dt("Organic") %></span>
+            <% end %>
+          </div>
+          <div class="hidden w-28 shrink-0 items-center gap-x-2 lg:flex">
+            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+              <div class="h-full rounded-full <%= competitor.threat_score >= 70 ? 'bg-rose-500' : competitor.threat_score >= 50 ? 'bg-amber-400' : 'bg-emerald-500' %>" style="width: <%= competitor.threat_score %>%"></div>
+            </div>
+            <span class="text-xs tabular-nums text-gray-500"><%= competitor.threat_score %></span>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Live signal feed") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("Derived relative-value signals; competitor prices are never stored.") %></p>
+    </div>
+    <ul role="list" class="divide-y divide-gray-100">
+      <% @signals.first(8).each do |signal| %>
+        <li class="px-6 py-3.5">
+          <div class="flex items-center justify-between gap-x-2">
+            <p class="truncate text-sm font-medium"><%= signal.product.name %></p>
+            <%= position_badge(signal.position, signal.delta_pct) %>
+          </div>
+          <p class="mt-1 text-xs text-gray-400">
+            vs <%= signal.competitor.name %> · <%= dt(signal.dimension) %> · <%= dt("%{time} ago", time: time_ago_in_words(signal.detected_at)) %>
+          </p>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<div class="mt-6 rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-4">
+    <div>
+      <h2 class="text-base font-semibold"><%= dt("Crawl index") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("What your crawler knows right now. Raw competitor prices are processed in memory and discarded; only these derived indices are stored (GDPR by architecture).") %></p>
+    </div>
+    <div class="flex items-center gap-x-2 text-xs text-gray-500">
+      <span class="relative flex h-2 w-2"><span class="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span><span class="relative h-2 w-2 rounded-full bg-emerald-500"></span></span>
+      <%= dt("Last run 14 minutes ago · next in 46 minutes") %>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3 pl-6 pr-3"><%= dt("Competitor") %></th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("SKUs indexed") %></th>
+          <th scope="col" class="px-3 py-3"><%= dt("Freshness") %></th>
+          <th scope="col" class="px-3 py-3"><%= dt("Price index") %></th>
+          <th scope="col" class="px-3 py-3"><%= dt("Quantity discounts") %></th>
+          <th scope="col" class="px-3 py-3"><%= dt("Subscription") %></th>
+          <th scope="col" class="py-3 pl-3 pr-6"><%= dt("Active sale") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <%
+          # price index: your average price / theirs across overlapping SKUs (>1 = you are more expensive)
+          crawl_rows = [
+            ["Radquartier",     214, dt("2 h ago"),  1.04, dt("Sets on helmets"), "PLUS €39/#{dt('year')}", dt("Expected mid-August")],
+            ["Bikeinsel",       187, dt("2 h ago"),  1.02, "-",                    "B-Club €4,99/#{dt('month')}", "-"],
+            ["Velodrom24",       96, dt("3 h ago"),  1.06, dt("2-pair tyre bundle −12%"), "-", "-"],
+            ["Lichtblick Velo",  22, dt("38 min ago"), 1.14, dt("Light set −15%"), "-", dt("Light-set promo, running")],
+            ["Alpenrad Shop",    41, dt("5 h ago"),  0.97, "-", "-", dt("Helmet clearance −40%")],
+            ["Pedalwerk",        73, dt("1 d ago"),  0.99, "-", "-", "-"],
+            ["Gravelheld",       38, dt("6 h ago"),  0.94, "-", "-", "-"]
+          ]
+        %>
+        <% crawl_rows.each do |name, skus, fresh, index, qty, sub, sale| %>
+          <tr>
+            <td class="py-3.5 pl-6 pr-3 font-semibold"><%= name %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums text-gray-500"><%= skus %></td>
+            <td class="px-3 py-3.5 text-xs text-gray-400"><%= fresh %></td>
+            <td class="px-3 py-3.5">
+              <div class="flex items-center gap-x-2">
+                <div class="relative h-1.5 w-24 rounded-full bg-gray-100">
+                  <div class="absolute inset-y-0 left-1/2 w-px bg-gray-300"></div>
+                  <%
+                    # map index 0.90..1.20 onto the bar; centre = parity
+                    pos = ((index - 0.9) / 0.3 * 100).clamp(4, 96)
+                  %>
+                  <div class="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white <%= index <= 1.0 ? 'bg-emerald-500' : index <= 1.08 ? 'bg-amber-400' : 'bg-rose-500' %>" style="left: <%= pos.round(1) %>%"></div>
+                </div>
+                <span class="tabular-nums text-xs <%= index <= 1.0 ? 'text-emerald-600 font-semibold' : index <= 1.08 ? 'text-gray-500' : 'text-rose-600 font-semibold' %>"><%= number_with_precision(index, precision: 2, separator: ",") %></span>
+              </div>
+            </td>
+            <td class="px-3 py-3.5 text-xs <%= qty == "-" ? 'text-gray-300' : 'text-gray-600 font-medium' %>"><%= qty %></td>
+            <td class="px-3 py-3.5 text-xs <%= sub == "-" ? 'text-gray-300' : 'text-gray-600 font-medium' %>"><%= sub %></td>
+            <td class="py-3.5 pl-3 pr-6 text-xs <%= sale == "-" ? 'text-gray-300' : 'text-amber-700 font-medium' %>"><%= sale %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+    <%= dt("Price index = your average price across overlapping SKUs relative to theirs. 1,00 = parity; above 1,00 you are more expensive. Green dot at or below parity, red when the gap exceeds 8%.") %>
+  </div>
+</div>

@@ -1,0 +1,280 @@
+<% content_for :title, dt("Dynamic pricing") %>
+
+<%= render "shared/page_header",
+    title: dt("Dynamic pricing engine"),
+    subtitle: dt("A closed loop: pricing, advertising, inventory and competitor position talk to each other every hour. Prices move inside guardrails; every change is logged with its reasoning.") %>
+
+<dl class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("SKUs under dynamic pricing"), value: @dynamic_products.size,
+      note: dt("of %{count} in catalog, opt-in per product", count: Product.count) %>
+  <%= render "shared/stat_tile", label: dt("Competitive win rate"), value: "#{@win_rate}%",
+      note: dt("SKUs at or below market price (target: where it pays)") %>
+  <%= render "shared/stat_tile", label: dt("Gross margin, blended"), value: "44,8%",
+      delta: "+1,9 pt", delta_positive: true, delta_label: dt("since engine went live") %>
+  <%= render "shared/stat_tile", label: dt("Price changes, 7 days"), value: @changes_7d,
+      note: dt("%{auto} auto-applied · %{held} held for review", auto: @auto_changes_7d, held: @changes_7d - @auto_changes_7d) %>
+</dl>
+
+<%
+  vb_w = 960
+  vb_h = 280
+  idx_h = 90
+  chart = price_chart_data(@price_points, width: vb_w, height: vb_h, index_height: idx_h)
+  rows = @price_points.map do |p|
+    {
+      x: chart[:x].call(p.day).round(1),
+      label: l(p.day, format: "%-d %b %Y"),
+      list: euro(p.list_price_cents, precision: 2),
+      sold: p.avg_sold_price_cents && euro(p.avg_sold_price_cents, precision: 2),
+      index: number_with_precision(p.market_min_index, precision: 2, separator: ",")
+    }
+  end
+%>
+<div class="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <div>
+      <h2 class="text-base font-semibold"><%= dt("Price development") %> · <%= @beacon.name %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("List price steps vs the average price actually sold at (from your Solidus order stream), last 120 days.") %></p>
+    </div>
+    <div class="flex items-center gap-x-6 text-xs text-gray-500">
+      <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded bg-gray-950"></span><%= dt("List price") %></span>
+      <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded" style="background:#b060ff"></span><%= dt("Avg sold price") %></span>
+    </div>
+  </div>
+  <div id="price-chart" class="relative mt-4" data-points="<%= rows.to_json %>">
+    <svg viewBox="0 0 <%= vb_w %> <%= vb_h %>" class="w-full" style="height:auto" role="img" aria-label="<%= dt("List price and average sold price over 120 days") %>">
+      <% chart[:y_ticks].each do |tick| %>
+        <line x1="52" x2="<%= vb_w - 24 %>" y1="<%= chart[:y].call(tick).round(1) %>" y2="<%= chart[:y].call(tick).round(1) %>" stroke="#f3f4f6" stroke-width="1" />
+        <text x="44" y="<%= (chart[:y].call(tick) + 3).round(1) %>" text-anchor="end" class="fill-gray-400" font-size="11"><%= euro(tick) %></text>
+      <% end %>
+      <% chart[:month_ticks].each do |(mx, label)| %>
+        <text x="<%= mx.round(1) %>" y="<%= vb_h - 2 %>" text-anchor="middle" class="fill-gray-400" font-size="11"><%= label %></text>
+      <% end %>
+      <path d="<%= chart[:sold_path] %>" fill="none" stroke="#b060ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.85" />
+      <path d="<%= chart[:step_path] %>" fill="none" stroke="#030712" stroke-width="2" stroke-linejoin="round" />
+      <% lp = chart[:last_point] %>
+      <circle cx="<%= chart[:x].call(lp.day).round(1) %>" cy="<%= chart[:y].call(lp.list_price_cents).round(1) %>" r="4" fill="#030712" stroke="#ffffff" stroke-width="2" />
+      <text x="<%= (chart[:x].call(lp.day) - 8).round(1) %>" y="<%= (chart[:y].call(lp.list_price_cents) - 10).round(1) %>" text-anchor="end" class="fill-gray-600" font-size="11" font-weight="600"><%= euro(lp.list_price_cents, precision: 2) %></text>
+      <line data-role="crosshair" x1="0" x2="0" y1="8" y2="<%= vb_h - 16 %>" stroke="#9ca3af" stroke-width="1" visibility="hidden" />
+    </svg>
+    <div data-role="tooltip" class="pointer-events-none absolute z-10 hidden min-w-44 rounded-lg bg-gray-950 px-3 py-2 text-xs text-white shadow-lg"></div>
+  </div>
+  <div class="mt-2 border-t border-gray-100 pt-3">
+    <p class="text-xs text-gray-400"><%= dt("Position vs market minimum (your price ÷ cheapest competitor, a derived index; raw prices never stored). Above the line = you are more expensive.") %></p>
+    <svg viewBox="0 0 <%= vb_w %> <%= idx_h %>" class="mt-1 w-full" style="height:auto" role="img" aria-label="<%= dt("Price index versus market minimum") %>">
+      <line x1="52" x2="<%= vb_w - 24 %>" y1="<%= chart[:index_parity_y].round(1) %>" y2="<%= chart[:index_parity_y].round(1) %>" stroke="#d1d5db" stroke-width="1" />
+      <text x="44" y="<%= (chart[:index_parity_y] + 3).round(1) %>" text-anchor="end" class="fill-gray-400" font-size="10">1,00</text>
+      <path d="<%= chart[:index_path] %>" fill="none" stroke="#ee87cb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+      <text x="<%= vb_w - 24 %>" y="12" text-anchor="end" class="fill-gray-500" font-size="10" font-weight="600"><%= dt("now 1,18: 18% above market min") %></text>
+    </svg>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById("price-chart");
+    if (!root || root.dataset.bound) return;
+    root.dataset.bound = "1";
+    var svg = root.querySelector("svg");
+    var crosshair = svg.querySelector('[data-role="crosshair"]');
+    var tooltip = root.querySelector('[data-role="tooltip"]');
+    var pts = JSON.parse(root.dataset.points);
+    var VB_W = <%= vb_w %>;
+    var LBL = { list: "<%= dt("List") %>", sold: "<%= dt("Avg sold") %>", index: "<%= dt("Index vs market min:") %>" };
+
+    function row(color, name, value) {
+      var r = document.createElement("div");
+      r.className = "flex items-center gap-2 py-0.5";
+      var key = document.createElement("span");
+      key.style.cssText = "display:inline-block;width:12px;height:2px;border-radius:1px;background:" + color;
+      var val = document.createElement("span");
+      val.className = "font-semibold";
+      val.textContent = value;
+      var label = document.createElement("span");
+      label.className = "text-gray-400";
+      label.textContent = name;
+      r.append(key, val, label);
+      return r;
+    }
+
+    svg.addEventListener("pointermove", function (e) {
+      var rect = svg.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width * VB_W;
+      var nearest = pts[0], best = Infinity;
+      pts.forEach(function (p) { var d = Math.abs(p.x - x); if (d < best) { best = d; nearest = p; } });
+      crosshair.setAttribute("x1", nearest.x);
+      crosshair.setAttribute("x2", nearest.x);
+      crosshair.setAttribute("visibility", "visible");
+      tooltip.textContent = "";
+      var head = document.createElement("div");
+      head.className = "mb-1 font-medium text-gray-300";
+      head.textContent = nearest.label;
+      tooltip.appendChild(head);
+      tooltip.appendChild(row("#a1a1aa", LBL.list, nearest.list));
+      if (nearest.sold) tooltip.appendChild(row("#b060ff", LBL.sold, nearest.sold));
+      var idx = document.createElement("div");
+      idx.className = "mt-1 text-gray-400";
+      idx.textContent = LBL.index + " " + nearest.index;
+      tooltip.appendChild(idx);
+      tooltip.classList.remove("hidden");
+      var px = nearest.x / VB_W * rect.width;
+      var flip = px > rect.width * 0.72;
+      tooltip.style.left = flip ? "" : (px + 14) + "px";
+      tooltip.style.right = flip ? (rect.width - px + 14) + "px" : "";
+      tooltip.style.top = Math.max(e.clientY - rect.top - 20, 8) + "px";
+    });
+    svg.addEventListener("pointerleave", function () {
+      crosshair.setAttribute("visibility", "hidden");
+      tooltip.classList.add("hidden");
+    });
+  })();
+</script>
+
+<div class="mt-6 rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Prices actually sold at") %> · <%= @beacon.name %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("The list price is one number. Realised prices differ by channel, campaign and customer history. Measured on the Solidus order stream, last 90 days.") %></p>
+  </div>
+  <div class="grid grid-cols-1 divide-y divide-gray-100 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+    <% { "channel" => dt("By channel"), "campaign" => dt("By campaign"), "segment" => dt("By customer") }.each do |dim, heading| %>
+      <div class="px-6 py-4">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500"><%= heading %></h3>
+        <ul role="list" class="mt-3 space-y-3">
+          <% @breakdowns.fetch(dim, []).each do |row| %>
+            <li class="flex items-baseline justify-between gap-x-3">
+              <div class="min-w-0">
+                <p class="truncate text-sm font-medium"><%= dt(row.label) %></p>
+                <p class="text-xs text-gray-400"><%= dt("%{n} orders", n: row.orders) %></p>
+              </div>
+              <div class="shrink-0 text-right">
+                <p class="text-sm font-semibold tabular-nums"><%= euro(row.avg_price_cents, precision: 2) %></p>
+                <% delta = (row.avg_price_cents - 114_90) * 100.0 / 114_90 %>
+                <p class="text-xs tabular-nums <%= delta.negative? ? 'text-rose-500' : 'text-gray-400' %>"><%= delta.zero? ? dt("at list") : dt("%{pct} vs list", pct: signed_pct(delta)) %></p>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+  <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+    <%= dt("Returning visitors buy €5,50 below list on average: the voucher-on-second-visit flow is doing the discounting your list price doesn't show.") %>
+  </div>
+</div>
+
+<div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+    <h2 class="text-base font-semibold"><%= dt("Guardrails") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("The engine never trades outside these bounds.") %></p>
+    <ul role="list" class="mt-4 space-y-2.5 text-sm">
+      <% [
+        [dt("Price floor"), dt("Unit cost + 25% minimum margin")],
+        [dt("Ceiling"), dt("Category ceiling · KVIs (Crest MIPS, Merino Jersey) held within ±2%")],
+        [dt("Volatility"), dt("Max ±5% change per day · min step €0,01")],
+        [dt("Psychology"), dt("Round to ,90 endings")],
+        [dt("Elasticity blend"), dt("30% weight toward the theoretical optimum, no sharp swings")],
+        [dt("Audit"), dt("Every change logged with trigger and reasoning")]
+      ].each do |label, detail| %>
+        <li class="flex gap-x-2.5">
+          <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" /></svg>
+          <p><span class="font-medium"><%= label %>.</span> <span class="text-gray-500"><%= detail %></span></p>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+    <h2 class="text-base font-semibold"><%= dt("The hourly loop") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("Last cycle completed 12 minutes ago · next in 48 minutes.") %></p>
+    <ol role="list" class="mt-4 space-y-3">
+      <% [
+        [dt("Sync competitor signals"), dt("relative-value indices refreshed from your crawler")],
+        [dt("Recalculate dynamic prices"), dt("cost floor → strategy → inventory ±10% → elasticity blend → guardrails")],
+        [dt("Sync feeds"), dt("Solidus → Google Merchant Center & Meta catalog")],
+        [dt("Reallocate ad budgets"), dt("POAS-weighted scores across Google, Meta, TikTok")],
+        [dt("Log the cycle"), dt("23 evaluations · 2 changes · 1 held for review")]
+      ].each_with_index do |(step, detail), i| %>
+        <li class="flex gap-x-3">
+          <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-50 text-xs font-semibold text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= i + 1 %></span>
+          <div>
+            <p class="text-sm font-medium"><%= step %></p>
+            <p class="text-xs text-gray-500"><%= detail %></p>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  </div>
+
+  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+    <h2 class="text-base font-semibold"><%= dt("Elasticity optima") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("P* = (C × ε) / (ε + 1), blended in at 30%, never applied raw.") %></p>
+    <table class="mt-4 min-w-full text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th class="pb-2 pr-2"><%= dt("SKU") %></th>
+          <th class="px-2 pb-2 text-right">ε</th>
+          <th class="px-2 pb-2 text-right">P*</th>
+          <th class="pl-2 pb-2 text-right"><%= dt("Now") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @elasticity_rows.first(6).each do |product, optimal| %>
+          <tr>
+            <td class="py-2 pr-2 text-xs font-medium"><%= product.name.sub(/\A(NordPeak|LumenRide|TrailForge|GripWorks|AlpenGlow|Cadenza|Veloce) /, "") %></td>
+            <td class="px-2 py-2 text-right text-xs tabular-nums text-gray-500"><%= number_with_precision(product.elasticity, precision: 1, separator: ",") %></td>
+            <td class="px-2 py-2 text-right text-xs tabular-nums text-gray-500"><%= euro(optimal, precision: 2) %></td>
+            <td class="pl-2 py-2 text-right text-xs tabular-nums font-semibold <%= (optimal - product.price_cents).abs > product.price_cents * 0.08 ? 'text-amber-600' : 'text-gray-950' %>"><%= euro(product.price_cents, precision: 2) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p class="mt-3 text-xs text-gray-400"><%= dt("Amber = current price more than 8% from the theoretical optimum; the blend closes the gap gradually.") %></p>
+  </div>
+</div>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Decision log") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("Every repricing decision with its trigger, strategy and the guardrail that shaped it.") %></p>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3.5 pl-6 pr-3"><%= dt("Product") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Price change") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Trigger") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Strategy") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Guardrail") %></th>
+          <th scope="col" class="py-3.5 pl-3 pr-6"><%= dt("Status") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @decisions.each do |decision| %>
+          <tr>
+            <td class="py-4 pl-6 pr-3">
+              <p class="font-medium"><%= decision.product.name %></p>
+              <p class="mt-0.5 text-xs text-gray-400"><%= dt("%{time} ago", time: time_ago_in_words(decision.occurred_at)) %></p>
+            </td>
+            <td class="px-3 py-4 text-right">
+              <span class="tabular-nums text-xs text-gray-400 line-through"><%= euro(decision.old_price_cents, precision: 2) %></span>
+              <span class="ml-1 tabular-nums font-semibold <%= decision.new_price_cents < decision.old_price_cents ? 'text-rose-600' : 'text-emerald-600' %>"><%= euro(decision.new_price_cents, precision: 2) %></span>
+            </td>
+            <td class="max-w-64 px-3 py-4 text-xs text-gray-500"><%= dt(decision.trigger) %></td>
+            <td class="px-3 py-4">
+              <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= dt(decision.strategy.capitalize) %></span>
+            </td>
+            <td class="max-w-52 px-3 py-4 text-xs text-gray-400"><%= decision.guardrail ? dt(decision.guardrail) : "-" %></td>
+            <td class="py-4 pl-3 pr-6">
+              <% if decision.status == "auto_applied" %>
+                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Auto-applied") %></span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("Pending review") %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

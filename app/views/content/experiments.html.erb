@@ -1,0 +1,98 @@
+<% content_for :title, dt("Content experiments") %>
+
+<div class="md:flex md:items-center md:justify-between">
+  <div class="min-w-0 flex-1">
+    <div class="flex items-center gap-x-3">
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl"><%= dt("Content experiments") %></h1>
+      <span class="inline-flex items-center rounded-full bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-gray-950">Beta</span>
+    </div>
+    <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-500"><%= dt("A/B and multivariate tests on live store content, measured on your Solidus orders. Winners roll out automatically at 95% significance, or wait for you, depending on your automation settings.") %></p>
+  </div>
+  <div class="mt-4 flex gap-x-3 md:ml-4 md:mt-0">
+    <%= link_to dt("Automation settings →"), settings_section_path("automation"), class: "text-sm font-semibold text-accent-600 hover:text-accent-700" %>
+    <button type="button" class="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"><%= dt("New experiment") %></button>
+  </div>
+</div>
+
+<div class="mt-8 space-y-4">
+  <% [
+    {
+      name: dt("Category intro: Lights & Electronics"), kind: dt("Multivariate"),
+      where: dt("Category page · DE + EN"), metric: "CTR",
+      variants: [["A", dt("Current intro"), "2,1%", false], ["B", dt("Shorter, price-led"), "2,2%", false], ["C", dt("Story-led, du-form"), "2,4%", true]],
+      status: dt("Variant C leads with +12% · 87% significance · needs 95% to roll out"),
+      significance: 87, actions: [dt("View variants"), dt("Stop test")]
+    },
+    {
+      name: dt("Product descriptions: long vs short"), kind: "A/B",
+      where: dt("8 product pages · mobile traffic"), metric: "CVR",
+      variants: [["A", dt("Long-form"), "3,1%", false], ["B", dt("Short + bullets"), "3,5%", true]],
+      status: dt("Winner B at 96% significance · rolling out to remaining products"),
+      significance: 96, actions: [dt("View rollout"), dt("Pause rollout")]
+    },
+    {
+      name: dt("AIO FAQ block: helmets"), kind: "A/B",
+      where: dt("Helmet category · answer-engine traffic"), metric: dt("AI citations"),
+      variants: [["A", dt("No FAQ block"), "2/mo", false], ["B", dt("FAQ + schema.org"), "7/mo", true]],
+      status: dt("Measuring AI-assistant citations · 4 weeks remaining"),
+      significance: 61, actions: [dt("View variants")]
+    }
+  ].each do |exp| %>
+    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-x-2">
+            <p class="text-sm font-semibold"><%= exp[:name] %></p>
+            <span class="rounded-md bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= exp[:kind] %></span>
+            <span class="text-xs text-gray-400"><%= exp[:where] %></span>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <% exp[:variants].each do |letter, label, value, leading| %>
+              <div class="rounded-xl border px-3.5 py-2.5 <%= leading ? 'border-accent-300 bg-accent-50/50 ring-1 ring-accent-300' : 'border-gray-200' %>">
+                <div class="flex items-center gap-x-2">
+                  <span class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold <%= leading ? 'bg-accent-500 text-white' : 'bg-gray-100 text-gray-600' %>"><%= letter %></span>
+                  <p class="text-xs font-semibold"><%= label %></p>
+                </div>
+                <p class="mt-1 text-sm font-semibold tabular-nums"><%= value %> <span class="text-xs font-medium text-gray-400"><%= exp[:metric] %></span></p>
+              </div>
+            <% end %>
+          </div>
+          <p class="mt-3 text-xs font-medium <%= exp[:significance] >= 95 ? 'text-emerald-600' : 'text-gray-500' %>"><%= exp[:status] %></p>
+        </div>
+        <div class="flex shrink-0 flex-col items-end gap-y-2">
+          <div class="flex items-center gap-x-2">
+            <div class="relative h-1.5 w-24 overflow-hidden rounded-full bg-gray-100">
+              <div class="h-full rounded-full <%= exp[:significance] >= 95 ? 'bg-emerald-500' : 'bg-amber-400' %>" style="width: <%= exp[:significance] %>%"></div>
+              <div class="absolute inset-y-0 left-[95%] w-px bg-gray-400"></div>
+            </div>
+            <span class="text-xs tabular-nums text-gray-500"><%= exp[:significance] %>%</span>
+          </div>
+          <div class="flex gap-x-2">
+            <% exp[:actions].each_with_index do |action, i| %>
+              <button type="button" class="<%= i.zero? ? 'rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800' : 'rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50' %>"><%= action %></button>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="mt-6 rounded-2xl bg-gray-950 p-6 text-white">
+  <h2 class="text-base font-semibold"><%= dt("Optimised for search and answer engines") %></h2>
+  <dl class="mt-4 grid grid-cols-3 gap-4">
+    <div>
+      <dt class="text-xs text-gray-400"><%= dt("Keywords tracked") %></dt>
+      <dd class="mt-1 text-2xl font-semibold tabular-nums">41</dd>
+    </div>
+    <div>
+      <dt class="text-xs text-gray-400"><%= dt("Schema coverage") %></dt>
+      <dd class="mt-1 text-2xl font-semibold tabular-nums">100%</dd>
+    </div>
+    <div>
+      <dt class="text-xs text-gray-400"><%= dt("AI citations / month") %></dt>
+      <dd class="mt-1 text-2xl font-semibold tabular-nums">12</dd>
+    </div>
+  </dl>
+  <p class="mt-4 text-sm leading-6 text-gray-300"><%= dt("Every page ships clean headings, schema.org product data and FAQ blocks that AI assistants can cite. When someone asks their assistant for the best bike light under €120, Velora is the shop it quotes.") %></p>
+</div>

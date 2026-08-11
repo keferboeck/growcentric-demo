@@ -1,0 +1,100 @@
+<% content_for :title, dt("Content queue") %>
+
+<div class="md:flex md:items-center md:justify-between">
+  <div class="min-w-0 flex-1">
+    <div class="flex items-center gap-x-3">
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl"><%= dt("Queue & approvals") %></h1>
+      <span class="inline-flex items-center rounded-full bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-gray-950">Beta</span>
+    </div>
+    <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-500"><%= dt("Everything Sherpa wrote that has not published itself yet, ordered by what needs you. The chain: Draft (Sherpa) → QA (Lena) → Approval (Georg).") %></p>
+  </div>
+  <div class="mt-4 flex md:ml-4 md:mt-0">
+    <%= link_to dt("Workflow settings →"), settings_section_path("content"), class: "text-sm font-semibold text-accent-600 hover:text-accent-700" %>
+  </div>
+</div>
+
+<div class="mt-8 space-y-6">
+  <section>
+    <h2 class="text-sm font-semibold text-gray-950"><%= dt("Waiting for you") %> <span class="ml-1 rounded-md bg-accent-50 px-1.5 py-0.5 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20">1</span></h2>
+    <div class="mt-3 rounded-2xl border border-accent-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0 max-w-2xl">
+          <p class="text-sm font-semibold"><%= dt("Beacon 1200: copy update after reprice") %></p>
+          <p class="mt-1 text-sm leading-6 text-gray-500"><%= dt("Description and bullet points rewritten for the €99,90 step: price claims re-checked, \"premium light\" framing softened to \"best value\", DE and EN in sync. QA passed (Lena, 3 hours ago).") %></p>
+          <p class="mt-2 text-xs text-gray-400"><%= dt("Diff: 14 lines changed across 2 languages · goes live with the price change") %></p>
+        </div>
+        <div class="flex shrink-0 flex-wrap gap-2">
+          <button type="button" class="rounded-full bg-gray-950 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Approve & publish") %></button>
+          <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("View diff") %></button>
+          <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Request changes") %></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-sm font-semibold text-gray-950"><%= dt("In QA with Lena") %> <span class="ml-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">1</span></h2>
+    <div class="mt-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-950/5">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0 max-w-2xl">
+          <p class="text-sm font-semibold"><%= dt("Lights & Electronics: new category intro") %></p>
+          <p class="mt-1 text-sm leading-6 text-gray-500"><%= dt("Reflects the repriced Beacon line-up and the Orbit push. In QA since this morning.") %></p>
+        </div>
+        <div class="flex shrink-0 gap-x-2">
+          <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("View draft") %></button>
+          <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Nudge Lena") %></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-sm font-semibold text-gray-950"><%= dt("Drafts") %> <span class="ml-1 rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">2</span></h2>
+    <div class="mt-3 space-y-3">
+      <% [
+        [dt("Storm Shell Jacket: EN translation"), dt("Sherpa is matching the DE original's tone; British spelling per your voice settings."), dt("Review draft")],
+        [dt("Saddle Pack 14L: SEO meta variants"), dt("Two titles, two descriptions, ready to enter the A/B test."), dt("Send to test")]
+      ].each do |title, detail, action| %>
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-950/5">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="min-w-0 max-w-2xl">
+              <p class="text-sm font-semibold"><%= title %></p>
+              <p class="mt-1 text-sm leading-6 text-gray-500"><%= detail %></p>
+            </div>
+            <div class="flex shrink-0 gap-x-2">
+              <button type="button" class="rounded-full bg-gray-950 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= action %></button>
+              <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Discard") %></button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-sm font-semibold text-gray-950"><%= dt("Recently published") %></h2>
+    <div class="mt-3 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+      <ul role="list" class="divide-y divide-gray-100">
+        <% [
+          [dt("Orbit Wheel Lights: description refresh (DE)"), dt("Auto-published 2 hours ago · typo fixes and du-form consistency")],
+          [dt("Merino Jersey: seasonal wording"), dt("Auto-published yesterday · \"spring rides\" became \"summer tours\"")],
+          [dt("Chain Doctor Pro: typo fix"), dt("Auto-published 2 days ago · one comma, one letter, logged anyway")]
+        ].each do |title, detail| %>
+          <li class="flex items-center justify-between gap-x-4 px-5 py-3.5">
+            <div class="min-w-0">
+              <p class="text-sm font-semibold"><%= title %></p>
+              <p class="mt-0.5 text-xs text-gray-500"><%= detail %></p>
+            </div>
+            <div class="flex shrink-0 gap-x-2">
+              <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Published") %></span>
+              <button type="button" class="text-xs font-semibold text-gray-400 hover:text-rose-600"><%= dt("Revert") %></button>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+      <div class="border-t border-gray-100 bg-gray-50/60 px-5 py-3 text-xs text-gray-500">
+        <%= dt("31 pieces published this month · 0 typos shipped · every change is versioned and revertable in Solidus.") %>
+      </div>
+    </div>
+  </section>
+</div>

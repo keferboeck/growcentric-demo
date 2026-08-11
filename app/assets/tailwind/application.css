@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  /* GrowCentric brand, from growcentric-landing (Radiant gradient) */
+  --color-brand-cream: #fff1be;
+  --color-brand-pink: #ee87cb;
+  --color-brand-purple: #b060ff;
+
+  /* Purple scale derived from the brand purple, used as the primary accent */
+  --color-accent-50: #f8f2ff;
+  --color-accent-100: #f0e3ff;
+  --color-accent-200: #e2ccff;
+  --color-accent-300: #cda4ff;
+  --color-accent-400: #b060ff;
+  --color-accent-500: #9d3ff7;
+  --color-accent-600: #8a1fe3;
+  --color-accent-700: #7514c0;
+  --color-accent-800: #63149d;
+  --color-accent-900: #52127e;
+  --color-accent-950: #360555;
+}
+
+/* Brand gradient utilities: match the landing page hero */
+.bg-brand-gradient {
+  background-image: linear-gradient(115deg, var(--color-brand-cream) 28%, var(--color-brand-pink) 70%, var(--color-brand-purple));
+}
+.text-brand-gradient {
+  background-image: linear-gradient(to right, var(--color-brand-cream) 28%, var(--color-brand-pink) 70%, var(--color-brand-purple));
+  background-clip: text;
+  color: transparent;
+}

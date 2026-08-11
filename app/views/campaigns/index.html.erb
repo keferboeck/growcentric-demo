@@ -1,0 +1,255 @@
+<% content_for :title, dt("Campaigns") %>
+
+<%= render "shared/page_header",
+    title: dt("Campaigns & budget allocation"),
+    subtitle: dt("Margin-aware campaign management. ROAS says what a campaign returns; POAS (ROAS × gross margin) says whether it earns money. The allocator moves budget to where profit actually lives."),
+    action_label: dt("New campaign") %>
+
+<dl class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("Monthly budget"), value: euro_compact(@total_budget),
+      note: dt("%{amount} spent in the last 30 days", amount: euro_compact(@total_spend)) %>
+  <%= render "shared/stat_tile", label: dt("Blended ROAS"), value: "#{number_with_precision(@blended_roas, precision: 1, separator: ',')}×",
+      note: dt("revenue per ad euro, all channels") %>
+  <%= render "shared/stat_tile", label: dt("Blended POAS"), value: "#{number_with_precision(@blended_poas, precision: 2, separator: ',')}×",
+      delta: "+0,21", delta_positive: true, delta_label: dt("since auto-allocation went live") %>
+  <%= render "shared/stat_tile", label: dt("Auto-managed"), value: "#{@auto_share}%",
+      note: dt("of campaigns under algorithmic budget control") %>
+</dl>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Active campaigns") %></h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3.5 pl-6 pr-3"><%= dt("Campaign") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Channel") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Budget / spend") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Margin") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right">ROAS</th>
+          <th scope="col" class="px-3 py-3.5 text-right">POAS</th>
+          <th scope="col" class="py-3.5 pl-3 pr-6"><%= dt("Control") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @campaigns.each do |campaign| %>
+          <tr>
+            <td class="py-4 pl-6 pr-3">
+              <p class="font-medium text-gray-950"><%= campaign.name %></p>
+              <p class="mt-0.5 text-xs text-gray-400"><%= campaign.target %></p>
+            </td>
+            <td class="px-3 py-4">
+              <% chip = { "google_shopping" => "bg-sky-50 text-sky-700 ring-sky-600/20",
+                          "meta"            => "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+                          "tiktok"          => "bg-gray-100 text-gray-700 ring-gray-500/20" }.fetch(campaign.channel) %>
+              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= chip %>"><%= campaign.channel_label %></span>
+            </td>
+            <td class="px-3 py-4">
+              <div class="flex items-center gap-x-2">
+                <div class="h-1.5 w-24 overflow-hidden rounded-full bg-gray-100">
+                  <div class="h-full rounded-full bg-accent-400" style="width: <%= [campaign.spend_30d_cents * 100 / campaign.monthly_budget_cents, 100].min %>%"></div>
+                </div>
+                <span class="text-xs tabular-nums text-gray-500"><%= euro_compact(campaign.spend_30d_cents) %> / <%= euro_compact(campaign.monthly_budget_cents) %></span>
+              </div>
+            </td>
+            <td class="px-3 py-4 text-right tabular-nums text-gray-500"><%= number_with_precision(campaign.margin_pct, precision: 0) %>%</td>
+            <td class="px-3 py-4 text-right tabular-nums font-medium"><%= number_with_precision(campaign.roas, precision: 1, separator: ",") %>×</td>
+            <td class="px-3 py-4 text-right">
+              <span class="tabular-nums font-semibold <%= campaign.poas >= 1.5 ? 'text-emerald-600' : campaign.poas >= 1 ? 'text-gray-950' : 'text-rose-600' %>">
+                <%= number_with_precision(campaign.poas, precision: 2, separator: ",") %>×
+              </span>
+            </td>
+            <td class="py-4 pl-3 pr-6">
+              <% if campaign.auto_managed %>
+                <span class="inline-flex items-center gap-x-1 rounded-md bg-accent-50 px-2 py-1 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20">
+                  <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h4.116l-.862 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 15.25 8h-4.116l.849-6.093Z" clip-rule="evenodd" /></svg>
+                  <%= dt("Auto") %>
+                </span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= dt("Manual") %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+    <%= dt("The classic trap, live in your account:") %> <span class="font-medium text-gray-700"><%= dt("Lights core runs 3,8× ROAS but only 0,76× POAS") %></span>. <%= dt("Every euro spent there loses money at 20% margin, while Bikepacking earns 3,22× POAS on a capped budget.") %>
+  </div>
+</div>
+
+<div class="mt-6 rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Budget reallocation engine") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400">
+      <%= dt("Allocation score per campaign = margin × conversion × inventory × competitive position; budget share follows") %> Score<sub>i</sub> / Σ Score<sub>j</sub>. <%= dt("Shifts above €500 need review unless auto-apply is enabled.") %>
+    </p>
+  </div>
+  <ul role="list" class="divide-y divide-gray-100">
+    <% @shifts.each do |shift| %>
+      <li class="px-6 py-4">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="min-w-0 max-w-2xl">
+            <div class="flex flex-wrap items-center gap-x-2 text-sm font-semibold">
+              <span class="text-gray-500 line-through decoration-rose-300"><%= shift.from_campaign.name %></span>
+              <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+              <span><%= shift.to_campaign.name %></span>
+              <span class="rounded-md bg-gray-950 px-2 py-0.5 text-xs font-semibold text-white"><%= euro(shift.amount_cents) %>/mo</span>
+            </div>
+            <p class="mt-1.5 text-sm leading-6 text-gray-500"><%= dt(shift.reason) %></p>
+            <div class="mt-2 flex flex-wrap gap-1.5 text-xs">
+              <% { dt("Margin") => shift.margin_factor, dt("Conversion") => shift.conversion_factor,
+                   dt("Inventory") => shift.inventory_factor, dt("Competitive") => shift.competitive_factor }.each do |label, factor| %>
+                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-0.5 font-medium text-gray-600 ring-1 ring-inset ring-gray-200">
+                  <%= label %> ×<%= number_with_precision(factor, precision: 2, separator: ",") %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+          <div class="flex shrink-0 flex-col items-end gap-y-2">
+            <p class="text-sm font-semibold text-emerald-600">POAS +<%= number_with_precision(shift.projected_poas_gain, precision: 2, separator: ",") %></p>
+            <% if shift.status == "auto_applied" %>
+              <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                <%= dt("Auto-applied %{time} ago", time: time_ago_in_words(shift.applied_at)) %>
+              </span>
+            <% else %>
+              <div class="flex gap-x-2">
+                <button type="button" class="rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Apply") %></button>
+                <button type="button" class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Dismiss") %></button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("A/B tests") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("Winners auto-apply at ≥ 95% significance; running tests keep spending on both variants until then.") %></p>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3.5 pl-6 pr-3"><%= dt("Test") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Variant A") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Variant B") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Uplift") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Significance") %></th>
+          <th scope="col" class="py-3.5 pl-3 pr-6"><%= dt("Status") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @ab_tests.each do |test| %>
+          <tr>
+            <td class="py-4 pl-6 pr-3">
+              <p class="font-medium"><%= dt(test.name) %></p>
+              <p class="mt-0.5 text-xs text-gray-400"><%= test.campaign.name %> · <%= test.metric %></p>
+            </td>
+            <td class="px-3 py-4 text-xs text-gray-500">
+              <%= dt(test.variant_a) %>
+              <p class="mt-0.5 tabular-nums font-semibold text-gray-950"><%= number_with_precision(test.a_value, precision: 2, separator: ",") %></p>
+            </td>
+            <td class="px-3 py-4 text-xs text-gray-500 <%= 'font-medium' if test.winner == 'b' %>">
+              <%= dt(test.variant_b) %>
+              <p class="mt-0.5 tabular-nums font-semibold <%= test.winner == 'b' ? 'text-emerald-600' : 'text-gray-950' %>"><%= number_with_precision(test.b_value, precision: 2, separator: ",") %></p>
+            </td>
+            <td class="px-3 py-4 text-right"><%= trend_text(test.metric.start_with?("CPA") ? -test.uplift_pct : test.uplift_pct) %></td>
+            <td class="px-3 py-4">
+              <div class="flex items-center gap-x-2">
+                <div class="relative h-1.5 w-20 overflow-hidden rounded-full bg-gray-100">
+                  <div class="h-full rounded-full <%= test.significance >= 95 ? 'bg-emerald-500' : 'bg-amber-400' %>" style="width: <%= test.significance %>%"></div>
+                  <div class="absolute inset-y-0 left-[95%] w-px bg-gray-400"></div>
+                </div>
+                <span class="text-xs tabular-nums text-gray-500"><%= number_with_precision(test.significance, precision: 1, separator: ",") %>%</span>
+              </div>
+            </td>
+            <td class="py-4 pl-3 pr-6">
+              <% if test.status == "complete" %>
+                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                  <%= dt("Winner") %> <%= test.winner.upcase %><%= " · #{dt('auto-applied')}" if test.auto_applied %>
+                </span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20"><%= dt("Running") %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="mt-6 rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-4">
+    <div>
+      <h2 class="text-base font-semibold"><%= dt("Channels & tracking") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("Every campaign link carries UTM tags automatically: utm_source=velora, utm_medium=channel, utm_campaign=slug. Offline channels get QR codes that resolve to tracked short links.") %></p>
+    </div>
+    <button type="button" class="rounded-full bg-white px-3.5 py-1.5 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Add channel") %></button>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3 pl-6 pr-3"><%= dt("Channel") %></th>
+          <th scope="col" class="px-3 py-3"><%= dt("Type") %></th>
+          <th scope="col" class="px-3 py-3">utm_medium</th>
+          <th scope="col" class="px-3 py-3 text-right"><%= dt("Sessions / 30d") %></th>
+          <th scope="col" class="py-3 pl-3 pr-6"><%= dt("Tracking") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <%
+          channels = [
+            ["Google Shopping", :online, "cpc", "12.480", :utm],
+            ["Meta", :online, "paid_social", "6.150", :utm],
+            ["TikTok", :online, "paid_social", "2.940", :utm],
+            ["Newsletter", :online, "email", "3.720", :utm],
+            [dt("Season flyer (print)"), :offline, "qr_print", "214", :qr],
+            [dt("Argus Bike Festival booth"), :offline, "qr_event", "89", :qr]
+          ]
+        %>
+        <% channels.each do |name, type, medium, sessions, tracking| %>
+          <tr>
+            <td class="py-3.5 pl-6 pr-3 font-semibold"><%= name %></td>
+            <td class="px-3 py-3.5">
+              <% if type == :online %>
+                <span class="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20"><%= dt("Online") %></span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"><%= dt("Offline") %></span>
+              <% end %>
+            </td>
+            <td class="px-3 py-3.5 font-mono text-xs text-gray-500"><%= medium %></td>
+            <td class="px-3 py-3.5 text-right tabular-nums text-gray-500"><%= sessions %></td>
+            <td class="py-3.5 pl-3 pr-6">
+              <% if tracking == :utm %>
+                <span class="text-xs text-gray-400"><%= dt("UTM auto-tagged") %></span>
+              <% else %>
+                <div class="flex items-center gap-x-2">
+                  <svg viewBox="0 0 21 21" class="h-8 w-8 shrink-0" shape-rendering="crispEdges">
+                    <rect width="21" height="21" fill="#ffffff"/>
+                    <path fill="#030712" d="M0 0h7v1H0zM0 1h1v1H0zM6 1h1v1H6zM0 2h1v1H0zM2 2h3v1H2zM6 2h1v1H6zM0 3h1v1H0zM2 3h3v1H2zM6 3h1v1H6zM0 4h1v1H0zM2 4h3v1H2zM6 4h1v1H6zM0 5h1v1H0zM6 5h1v1H6zM0 6h7v1H0zM14 0h7v1h-7zM14 1h1v1h-1zM20 1h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM14 5h1v1h-1zM20 5h1v1h-1zM14 6h7v1h-7zM0 14h7v1H0zM0 15h1v1H0zM6 15h1v1H6zM0 16h1v1H0zM2 16h3v1H2zM6 16h1v1H6zM0 17h1v1H0zM2 17h3v1H2zM6 17h1v1H6zM0 18h1v1H0zM2 18h3v1H2zM6 18h1v1H6zM0 19h1v1H0zM6 19h1v1H6zM0 20h7v1H0zM9 0h1v1H9zM11 0h1v2h-1zM9 2h2v1H9zM12 2h1v1h-1zM10 3h1v1h-1zM12 3h1v2h-1zM8 4h2v1H8zM11 4h1v1h-1zM9 5h1v1H9zM11 5h2v1h-2zM8 6h1v1H8zM10 6h1v1h-1zM12 6h1v1h-1zM0 8h2v1H0zM3 8h2v1H3zM6 8h2v1H6zM9 8h1v1H9zM11 8h2v1h-2zM14 8h2v1h-2zM17 8h1v1h-1zM19 8h2v1h-2zM1 9h1v1H1zM4 9h1v1H4zM7 9h2v1H7zM10 9h1v1h-1zM13 9h1v1h-1zM16 9h2v1h-2zM19 9h1v1h-1zM0 10h1v1H0zM2 10h2v1H2zM5 10h2v1H5zM8 10h1v1H8zM11 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h3v1h-3zM1 11h2v1H1zM4 11h1v1H4zM6 11h1v1H6zM9 11h2v1H9zM12 11h2v1h-2zM15 11h1v1h-1zM17 11h1v1h-1zM20 11h1v1h-1zM0 12h2v1H0zM3 12h1v1H3zM5 12h1v1H5zM7 12h2v1H7zM10 12h2v1h-2zM13 12h1v1h-1zM15 12h3v1h-3zM19 12h1v1h-1zM8 14h2v1H8zM11 14h2v1h-2zM14 14h1v1h-1zM16 14h2v1h-2zM19 14h2v1h-2zM9 15h1v1H9zM12 15h1v1h-1zM15 15h2v1h-2zM18 15h1v1h-1zM20 15h1v1h-1zM8 16h1v1H8zM10 16h2v1h-2zM13 16h2v1h-2zM17 16h1v1h-1zM19 16h1v1h-1zM9 17h2v1H9zM12 17h1v1h-1zM14 17h2v1h-2zM18 17h2v1h-2zM8 18h1v1H8zM11 18h1v1h-1zM13 18h1v1h-1zM16 18h2v1h-2zM20 18h1v1h-1zM9 19h1v1H9zM11 19h2v1h-2zM14 19h1v1h-1zM17 19h1v1h-1zM19 19h1v1h-1zM8 20h2v1H8zM12 20h2v1h-2zM15 20h2v1h-2zM18 20h1v1h-1zM20 20h1v1h-1z"/>
+                  </svg>
+                  <div>
+                    <p class="text-xs font-medium text-gray-600"><%= sessions %> <%= dt("scans") %></p>
+                    <button type="button" class="text-xs font-semibold text-accent-600 hover:text-accent-700"><%= dt("Download QR") %></button>
+                  </div>
+                </div>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+    <%= dt("Offline sessions land in the same attribution as online: a QR scan opens velora.keferboeck.com/s/flyer26 with the channel's UTM set, so POAS math includes print and events.") %>
+  </div>
+</div>

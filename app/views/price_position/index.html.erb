@@ -1,0 +1,250 @@
+<% content_for :title, dt("Price position") %>
+
+<%= render "shared/page_header",
+    title: dt("Price position & visibility"),
+    subtitle: dt("Are you the cheapest, and does it matter? Price position weighed against visibility and how the product actually sells. You don't need to win on price where you win on presence.") %>
+
+<%= render "shared/product_filters", count: @products.size %>
+
+<dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("Cheapest in market"), value: "#{@cheapest.size} #{'SKU'.pluralize(@cheapest.size)}",
+      note: dt("at or below the lowest discovered competitor") %>
+  <%= render "shared/stat_tile", label: dt("Premium, but winning"), value: "#{@premium_ok.size} #{'SKU'.pluralize(@premium_ok.size)}",
+      note: dt("above market price with visibility ≥ 65 and stable sales") %>
+  <%= render "shared/stat_tile", label: dt("Losing on price"), value: "#{@losing.size} #{'SKU'.pluralize(@losing.size)}",
+      note: dt("more than 10% above the market minimum") %>
+  <%= render "shared/stat_tile", label: dt("Average visibility"), value: @avg_visibility,
+      note: dt("share of voice across contested queries") %>
+</dl>
+
+<% if @undermarketed.any? %>
+  <div class="mt-6 rounded-2xl p-px bg-brand-gradient shadow-sm">
+    <div class="rounded-[calc(1rem-1px)] bg-white p-6">
+      <div class="flex items-center gap-x-2">
+        <svg class="h-5 w-5 text-accent-500" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1a6 6 0 0 0-3.815 10.631C7.237 12.5 8 13.443 8 14.456v.644a.75.75 0 0 0 .572.729 6.016 6.016 0 0 0 2.856 0A.75.75 0 0 0 12 15.1v-.644c0-1.013.762-1.957 1.815-2.825A6 6 0 0 0 10 1ZM8.863 17.414a.75.75 0 0 0-.226 1.483 9.066 9.066 0 0 0 2.726 0 .75.75 0 0 0-.226-1.483 7.553 7.553 0 0 1-2.274 0Z" /></svg>
+        <h2 class="text-base font-semibold"><%= dt("Viewed and bought, but not advertised") %></h2>
+      </div>
+      <p class="mt-1 text-sm text-gray-500"><%= dt("High traffic and conversions with almost no paid support. These earn attention before any pricing move.") %></p>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <% @undermarketed.first(3).each do |product| %>
+          <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-200">
+            <p class="truncate text-sm font-semibold"><%= product.name %></p>
+            <dl class="mt-2 space-y-1 text-xs text-gray-500">
+              <div class="flex justify-between"><dt><%= dt("Views / 30d") %></dt><dd class="font-medium tabular-nums text-gray-950"><%= number_with_delimiter(product.pageviews_30d, delimiter: ".") %></dd></div>
+              <div class="flex justify-between"><dt><%= dt("Purchases / 30d") %></dt><dd class="font-medium tabular-nums text-gray-950"><%= product.units_sold %></dd></div>
+              <div class="flex justify-between"><dt><%= dt("Ad spend / 30d") %></dt><dd class="font-medium tabular-nums text-gray-950"><%= euro(product.monthly_ad_spend_cents) %></dd></div>
+              <div class="flex justify-between"><dt><%= dt("Conversion") %></dt><dd class="font-medium tabular-nums text-emerald-600"><%= number_with_precision(product.units_sold * 100.0 / product.pageviews_30d, precision: 1, separator: ",") %>%</dd></div>
+            </dl>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Price position by product") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("Positions are derived relative-value indices from your crawler; raw competitor prices are never stored.") %></p>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3.5 pl-6 pr-3"><%= dt("Product") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Your price") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("vs market min") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("vs median") %></th>
+          <th scope="col" class="px-3 py-3.5"><%= dt("Visibility") %></th>
+          <th scope="col" class="px-3 py-3.5 text-right"><%= dt("Views → buys") %></th>
+          <th scope="col" class="py-3.5 pl-3 pr-6"><%= dt("Verdict") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @products.each do |product| %>
+          <% verdict = PricePositionController.verdict(product) %>
+          <tr>
+            <td class="py-4 pl-6 pr-3">
+              <p class="font-medium text-gray-950"><%= product.name %></p>
+              <p class="mt-0.5 text-xs text-gray-400"><%= dt(product.category.name) %> · <%= dt(product.price_tier) %> · <%= dt(product.season_label) %></p>
+            </td>
+            <td class="px-3 py-4 text-right tabular-nums"><%= euro(product.price_cents, precision: 2) %></td>
+            <td class="px-3 py-4 text-right tabular-nums font-medium <%= product.market_min_delta_pct <= 0 ? 'text-emerald-600' : product.market_min_delta_pct > 10 ? 'text-rose-600' : 'text-gray-600' %>">
+              <%= signed_pct(product.market_min_delta_pct) %>
+            </td>
+            <td class="px-3 py-4 text-right tabular-nums text-gray-500"><%= signed_pct(product.market_median_delta_pct) %></td>
+            <td class="px-3 py-4">
+              <div class="flex items-center gap-x-2">
+                <div class="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100">
+                  <div class="h-full rounded-full <%= product.visibility_score >= 65 ? 'bg-emerald-500' : product.visibility_score >= 40 ? 'bg-amber-400' : 'bg-gray-300' %>" style="width: <%= product.visibility_score %>%"></div>
+                </div>
+                <span class="text-xs tabular-nums text-gray-500"><%= product.visibility_score %></span>
+              </div>
+            </td>
+            <td class="px-3 py-4 text-right text-xs tabular-nums text-gray-500">
+              <%= number_with_delimiter(product.pageviews_30d, delimiter: ".") %> → <%= product.units_sold %>
+            </td>
+            <td class="py-4 pl-3 pr-6">
+              <% case verdict %>
+              <% when :cheapest %>
+                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"><%= dt("Cheapest") %></span>
+              <% when :cheapest_invisible %>
+                <span class="inline-flex items-center rounded-md bg-accent-50 px-2 py-1 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= dt("Cheapest, invisible") %></span>
+              <% when :premium_ok %>
+                <span class="inline-flex items-center rounded-md bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20"><%= dt("Premium holds") %></span>
+              <% when :losing %>
+                <span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20"><%= dt("Losing on price") %></span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><%= dt("Watch") %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+  <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5 xl:col-span-2">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Competitive heat") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("How contested each product is: 0–100 from price-change frequency, active competitors and how fast they respond to your moves. A fast response means the product matters to them.") %></p>
+      <div class="mt-2.5 flex flex-wrap gap-1.5 text-xs">
+        <% [["Lights & Electronics", 84], ["Components", 76], ["Helmets", 60], ["Apparel", 38], ["Tools & Maintenance", 22], ["Bikepacking Bags", 9]].each do |category, heat| %>
+          <span class="inline-flex items-center gap-x-1.5 rounded-md bg-gray-50 px-2 py-1 font-medium text-gray-600 ring-1 ring-inset ring-gray-200">
+            <%= dt(category) %>
+            <span class="tabular-nums font-semibold <%= heat >= 70 ? 'text-rose-600' : heat >= 40 ? 'text-amber-600' : 'text-gray-400' %>"><%= heat %></span>
+          </span>
+        <% end %>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead>
+          <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <th scope="col" class="py-3 pl-6 pr-3"><%= dt("Product") %></th>
+            <th scope="col" class="px-3 py-3"><%= dt("Heat") %></th>
+            <th scope="col" class="px-3 py-3 text-right"><%= dt("Price moves / 30d") %></th>
+            <th scope="col" class="px-3 py-3"><%= dt("Response to your moves") %></th>
+            <th scope="col" class="py-3 pl-3 pr-6"><%= dt("Reading") %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <%
+            heat_rows = [
+              ["LumenRide Beacon 1200 Front Light", 94, 11, dt("median 6 h (Lichtblick)"), dt("Their bestseller too"), :engage],
+              ["Veloce Gravel Tyre 45c (Pair)", 88, 9, dt("median 4 h (Velodrom24)"), dt("Fiercely defended"), :avoid],
+              ["LumenRide Pulse Rear Radar", 87, 8, dt("median 9 h"), dt("Their bestseller too"), :engage],
+              ["NordPeak Vista Commuter Helmet", 72, 9, dt("no move from you yet"), dt("Not on your radar"), :radar],
+              ["NordPeak Crest MIPS Helmet", 55, 3, dt("median 2 days"), dt("Contested, but slow"), :neutral],
+              ["AlpenGlow Merino Jersey", 41, 2, dt("median 3 days"), dt("Moderate interest"), :neutral],
+              ["LumenRide Orbit Wheel Lights", 12, 1, dt("no reaction in 90 days"), dt("You own this niche"), :calm],
+              ["TrailForge Saddle Pack 14L", 8, 0, dt("no reaction in 90 days"), dt("You own this niche"), :calm]
+            ]
+          %>
+          <% heat_rows.each do |name, heat, moves, response, reading, kind| %>
+            <tr class="<%= 'bg-amber-50/40' if kind == :radar %>">
+              <td class="py-3.5 pl-6 pr-3 font-medium"><%= name %></td>
+              <td class="px-3 py-3.5">
+                <div class="flex items-center gap-x-2">
+                  <div class="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100">
+                    <div class="h-full rounded-full <%= heat >= 70 ? 'bg-rose-500' : heat >= 40 ? 'bg-amber-400' : 'bg-emerald-500' %>" style="width: <%= heat %>%"></div>
+                  </div>
+                  <span class="w-7 text-right text-sm font-semibold tabular-nums <%= heat >= 70 ? 'text-rose-600' : heat >= 40 ? 'text-amber-600' : 'text-emerald-600' %>"><%= heat %></span>
+                </div>
+              </td>
+              <td class="px-3 py-3.5 text-right tabular-nums text-gray-500"><%= moves %></td>
+              <td class="px-3 py-3.5 text-xs text-gray-500"><%= response %></td>
+              <td class="py-3.5 pl-3 pr-6">
+                <% chip = { engage: "bg-rose-50 text-rose-700 ring-rose-600/20", avoid: "bg-rose-50 text-rose-700 ring-rose-600/20",
+                            radar: "bg-amber-50 text-amber-700 ring-amber-600/20", neutral: "bg-gray-50 text-gray-600 ring-gray-500/10",
+                            calm: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" }.fetch(kind) %>
+                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= chip %>"><%= reading %></span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+      <%= dt("High heat cuts both ways: it marks their bestsellers (worth contesting with a plan) and warns where a price cut just triggers a race. Low heat on your hidden gems means you can push them without waking anyone.") %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Response timeline · Beacon 1200") %></h2>
+      <p class="mt-0.5 text-xs text-gray-400"><%= dt("Your price steps and who followed, how fast.") %></p>
+    </div>
+    <ol class="space-y-4 px-6 py-5">
+      <% [
+        [dt("12 Jul · You: €119,90 → €114,90"), true, [[dt("Lichtblick −3,8%"), dt("after 6 h")], [dt("Radquartier −2,1%"), dt("after 26 h")]]],
+        [dt("1 Aug · You: €114,90 → €109,90"), true, [[dt("Lichtblick −4,3%"), dt("after 5 h")]]],
+        [dt("8 Aug · Lichtblick: −18%, unprompted"), false, [[dt("You: €99,90 step waiting for approval"), dt("pending")]]]
+      ].each do |step, ours, responses| %>
+        <li>
+          <div class="flex items-center gap-x-2">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full <%= ours ? 'bg-gray-950' : 'bg-rose-500' %>"></span>
+            <p class="text-sm font-semibold"><%= step %></p>
+          </div>
+          <ul class="ml-1 mt-1.5 space-y-1 border-l border-gray-200 pl-4">
+            <% responses.each do |who, delay| %>
+              <li class="flex items-center justify-between gap-x-2 text-xs">
+                <span class="font-medium text-gray-600"><%= who %></span>
+                <span class="shrink-0 tabular-nums text-gray-400"><%= delay %></span>
+              </li>
+            <% end %>
+          </ul>
+        </li>
+      <% end %>
+    </ol>
+    <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs leading-5 text-gray-500">
+      <%= dt("Median response: 6 hours. They watch this product like a bestseller, because for them it is one. Heat 94.") %>
+    </div>
+  </div>
+</div>
+
+<div class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+  <div class="border-b border-gray-100 px-6 py-4">
+    <h2 class="text-base font-semibold"><%= dt("Who advertises where") %></h2>
+    <p class="mt-0.5 text-xs text-gray-400"><%= dt("Detected ad presence on contested products across Google Shopping, Meta and TikTok.") %></p>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="py-3.5 pl-6 pr-3"><%= dt("Product") %></th>
+          <th scope="col" class="px-3 py-3.5">Google Shopping</th>
+          <th scope="col" class="px-3 py-3.5">Meta</th>
+          <th scope="col" class="py-3.5 pl-3 pr-6">TikTok</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @matrix.each do |product, cells| %>
+          <tr>
+            <td class="py-4 pl-6 pr-3 font-medium"><%= product.name %></td>
+            <% ChannelPresence::CHANNELS.each_with_index do |channel, i| %>
+              <td class="px-3 py-4 <%= 'pl-3 pr-6' if i == 2 %>">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <% entries = cells[channel] %>
+                  <% if entries.empty? %>
+                    <span class="text-xs text-gray-300">-</span>
+                  <% else %>
+                    <% entries.each do |cp| %>
+                      <% if cp.competitor.nil? %>
+                        <span class="inline-flex items-center rounded-md bg-gray-950 px-2 py-0.5 text-xs font-medium text-white"><%= dt("You") %></span>
+                      <% else %>
+                        <span class="inline-flex items-center rounded-md bg-brand-pink/10 px-2 py-0.5 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-600/20"><%= cp.competitor.name %></span>
+                      <% end %>
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

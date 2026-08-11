@@ -1,0 +1,53 @@
+<div class="space-y-6">
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Autonomy: what runs without you") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("Every automation can either apply changes itself or stage them for your approval. Anything outside its threshold always waits for you.") %></p>
+    </div>
+    <div class="divide-y divide-gray-100 px-6">
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Auto-apply price changes"),
+          description: dt("Repricing inside all guardrails applies automatically. Changes beyond the daily threshold below are staged for review instead.") %>
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Auto-apply budget shifts"),
+          description: dt("Budget moves below the cap below are applied and logged. Larger shifts appear as suggestions on the campaigns page.") %>
+      <%= render "settings/toggle_row", on: true,
+          label: dt("Auto-apply A/B test winners"),
+          description: dt("Winning variants roll out once they reach the significance threshold below.") %>
+      <%= render "settings/toggle_row", on: false,
+          label: dt("Auto-react to competitor moves"),
+          description: dt("Stage and apply a prepared reaction (price match, bundle counter, budget pause) when a competitor move crosses your relevance threshold. Currently every reaction waits for approval in the morning briefing.") %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Thresholds") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("The lines between \"just do it\" and \"ask me first\".") %></p>
+    </div>
+    <dl class="divide-y divide-gray-100 px-6">
+      <% [
+        [dt("Max automatic price change per day"), "5", "%", dt("Larger steps are split over days or staged for review.")],
+        [dt("Minimum margin floor"), "25", "%", dt("The engine never prices below unit cost plus this margin.")],
+        [dt("Auto budget shift cap"), "500", "€", dt("Shifts above this amount need a click from you.")],
+        [dt("A/B significance for auto-rollout"), "95", "%", dt("Below this, both variants keep running.")],
+        [dt("Competitor move relevance"), "10", "%", dt("Price or offer moves smaller than this only appear in the log, not in your briefing.")]
+      ].each do |label, value, unit, hint| %>
+        <div class="flex items-center justify-between gap-x-6 py-4">
+          <div class="min-w-0">
+            <dt class="text-sm font-semibold"><%= label %></dt>
+            <dd class="mt-0.5 text-sm text-gray-500"><%= hint %></dd>
+          </div>
+          <div class="flex shrink-0 items-center gap-x-1.5">
+            <input type="number" value="<%= value %>" class="w-20 rounded-lg border-0 bg-gray-50 px-3 py-1.5 text-right text-sm font-semibold tabular-nums ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-accent-400">
+            <span class="text-sm text-gray-400"><%= unit %></span>
+          </div>
+        </div>
+      <% end %>
+    </dl>
+    <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4">
+      <p class="text-xs text-gray-400"><%= dt("KVI products (Crest MIPS, Merino Jersey) are always capped at ±2% regardless of these settings.") %></p>
+      <button type="button" class="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"><%= dt("Save changes") %></button>
+    </div>
+  </div>
+</div>

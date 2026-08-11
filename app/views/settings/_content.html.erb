@@ -1,0 +1,144 @@
+<div class="space-y-6">
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Brand voice") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("How your shop speaks, set per language. Sherpa never writes outside these rules.") %></p>
+    </div>
+    <div class="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+      <%
+        voices = [
+          {
+            country: :de, lang: "Deutsch",
+            formality_label: dt("Form of address"),
+            formality_on: "du", formality_off: "Sie",
+            tones: [dt("Warm"), dt("Direct"), dt("Playful")],
+            guide: "Velora_Styleguide_DE.pdf",
+            samples: [dt("Blog: 12 bikepacking posts"), "Produkttexte_2025.docx", dt("Newsletter archive 2024–2026")],
+            learned: dt("Short sentences, du-form, cycling jargon welcome, no anglicisms.")
+          },
+          {
+            country: :uk, lang: "English",
+            formality_label: dt("Register"),
+            formality_on: dt("Conversational"), formality_off: dt("Formal"),
+            tones: [dt("Warm"), dt("Direct"), dt("Confident")],
+            guide: "Velora_Styleguide_EN.pdf",
+            samples: [dt("About page & brand story"), "Product_texts_EN.docx"],
+            learned: dt("Plain English, active voice, no exclamation marks, British spelling.")
+          }
+        ]
+      %>
+      <% voices.each do |voice| %>
+        <div class="px-6 py-5">
+          <div class="flex items-center gap-x-2">
+            <%= render "shared/flag", country: voice[:country], css: "h-5 w-5", suffix: "-voice" %>
+            <p class="text-sm font-semibold"><%= voice[:lang] %></p>
+          </div>
+          <div class="mt-3 space-y-3 text-sm">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400"><%= voice[:formality_label] %></p>
+              <div class="mt-1.5 flex gap-x-1.5">
+                <span class="rounded-md bg-accent-50 px-2 py-1 text-xs font-semibold text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= voice[:formality_on] %></span>
+                <span class="rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-gray-200"><%= voice[:formality_off] %></span>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400"><%= dt("Tone") %></p>
+              <div class="mt-1.5 flex flex-wrap gap-1.5">
+                <% voice[:tones].each do |tone| %>
+                  <span class="rounded-md bg-accent-50 px-2 py-1 text-xs font-semibold text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= tone %></span>
+                <% end %>
+                <% [dt("Serious"), dt("Neutral")].each do |tone| %>
+                  <span class="rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-gray-200"><%= tone %></span>
+                <% end %>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400"><%= dt("Language guide") %></p>
+              <div class="mt-1.5 flex items-center justify-between gap-x-2">
+                <p class="flex min-w-0 items-center gap-x-1.5 truncate text-xs font-medium text-gray-600">
+                  <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                  <%= voice[:guide] %>
+                </p>
+                <button type="button" class="shrink-0 text-xs font-semibold text-accent-600 hover:text-accent-700"><%= dt("Replace") %></button>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400"><%= dt("Tone sources") %></p>
+              <ul class="mt-1.5 space-y-1">
+                <% voice[:samples].each do |sample| %>
+                  <li class="flex items-center gap-x-1.5 text-xs font-medium text-gray-600">
+                    <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12H9m6.75 3H9M21 11.25v8.25a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 19.5V4.5a2.25 2.25 0 0 1 2.25-2.25h5.379c.597 0 1.169.237 1.591.659l6.121 6.121c.422.422.659.994.659 1.591Z" /></svg>
+                    <%= sample %>
+                  </li>
+                <% end %>
+                <li class="flex items-center gap-x-1.5 text-xs font-medium text-gray-600">
+                  <svg class="h-4 w-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m-17.432 0A17.926 17.926 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
+                  <%= dt("Shop crawl: 214 pages analysed · 12 May") %>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400"><%= dt("What Sherpa learned") %></p>
+              <p class="mt-1 text-xs leading-5 text-gray-500"><%= voice[:learned] %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 px-6 py-3.5">
+      <p class="text-xs text-gray-400"><%= dt("Upload blog posts or old descriptions and Sherpa learns your tone from them.") %></p>
+      <div class="flex gap-x-2">
+        <button type="button" class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= dt("Add sample texts") %></button>
+        <button type="button" class="rounded-full bg-gray-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"><%= dt("Re-crawl website") %></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("What Sherpa maintains") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("Per content type: publish automatically or route through the approval chain.") %></p>
+    </div>
+    <div class="divide-y divide-gray-100 px-6">
+      <%= render "settings/toggle_row", on: true, label: dt("Product descriptions"), description: dt("Rewrites on price, stock or season changes") %>
+      <%= render "settings/toggle_row", on: false, label: dt("Category pages"), description: dt("Intro texts follow the assortment") %>
+      <%= render "settings/toggle_row", on: true, label: dt("SEO meta & structured data"), description: dt("Titles, descriptions, schema.org product markup") %>
+      <%= render "settings/toggle_row", on: true, label: dt("AIO answer snippets"), description: dt("FAQ blocks that AI assistants cite when recommending shops") %>
+      <%= render "settings/toggle_row", on: true, label: dt("Typo & grammar fixes"), description: dt("Across all existing content, any language") %>
+    </div>
+    <div class="border-t border-gray-100 bg-gray-50/60 px-6 py-3 text-xs text-gray-500">
+      <%= dt("Toggle on = auto-publish inside the guardrails. Toggle off = every change walks the approval chain below.") %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 px-6 py-4">
+      <h2 class="text-base font-semibold"><%= dt("Approval workflow") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= dt("New content walks this chain. Typo fixes and meta updates skip it (your setting).") %></p>
+    </div>
+    <div class="px-6 py-5">
+      <ol class="flex items-center gap-x-2">
+        <% [
+          [dt("Draft"), "Sherpa"],
+          ["QA", "Lena Moser"],
+          [dt("Approval"), "Georg"]
+        ].each_with_index do |(step, who), i| %>
+          <% unless i.zero? %><div class="h-px flex-1 bg-gray-200"></div><% end %>
+          <li class="flex flex-col items-center gap-y-1">
+            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-xs font-bold text-accent-700"><%= i + 1 %></span>
+            <p class="text-xs font-semibold"><%= step %></p>
+            <p class="text-[10px] text-gray-400"><%= who %></p>
+          </li>
+        <% end %>
+      </ol>
+      <div class="mt-4 divide-y divide-gray-100 border-t border-gray-100">
+        <%= render "settings/toggle_row", on: true,
+            label: dt("Auto-accept typo & grammar fixes"),
+            description: dt("Pure corrections publish immediately and are logged.") %>
+        <%= render "settings/toggle_row", on: false,
+            label: dt("Skip QA for SEO meta"),
+            description: dt("Meta changes would go straight to approval. Currently the full chain runs.") %>
+      </div>
+    </div>
+  </div>
+</div>

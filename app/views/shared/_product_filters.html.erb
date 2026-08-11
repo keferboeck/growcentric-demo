@@ -1,0 +1,40 @@
+<%
+  select_css = "rounded-lg border-0 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-accent-400"
+  seasons = [[dt("All-season"), "all_season"], [dt("Summer"), "summer"], [dt("Winter"), "winter"]]
+%>
+<form method="get" class="mt-6 flex flex-wrap items-center gap-2">
+  <select name="department" onchange="this.form.submit()" class="<%= select_css %>">
+    <option value=""><%= dt("All departments") %></option>
+    <% Department.order(:name).pluck(:name).each do |name| %>
+      <option value="<%= name %>" <%= "selected" if params[:department] == name %>><%= dt(name) %></option>
+    <% end %>
+  </select>
+  <select name="category" onchange="this.form.submit()" class="<%= select_css %>">
+    <option value=""><%= dt("All categories") %></option>
+    <% Category.order(:name).pluck(:name).each do |name| %>
+      <option value="<%= name %>" <%= "selected" if params[:category] == name %>><%= dt(name) %></option>
+    <% end %>
+  </select>
+  <select name="brand" onchange="this.form.submit()" class="<%= select_css %>">
+    <option value=""><%= dt("All brands") %></option>
+    <% Brand.order(:name).pluck(:name).each do |name| %>
+      <option value="<%= name %>" <%= "selected" if params[:brand] == name %>><%= name %></option>
+    <% end %>
+  </select>
+  <select name="tier" onchange="this.form.submit()" class="<%= select_css %>">
+    <option value=""><%= dt("All price tiers") %></option>
+    <% ["Entry", "Mid", "Premium"].each do |tier| %>
+      <option value="<%= tier %>" <%= "selected" if params[:tier] == tier %>><%= dt(tier) %> <%= { "Entry" => "(< €50)", "Mid" => "(€50–150)", "Premium" => "(> €150)" }[tier] %></option>
+    <% end %>
+  </select>
+  <select name="season" onchange="this.form.submit()" class="<%= select_css %>">
+    <option value=""><%= dt("All seasons") %></option>
+    <% seasons.each do |label, value| %>
+      <option value="<%= value %>" <%= "selected" if params[:season] == value %>><%= label %></option>
+    <% end %>
+  </select>
+  <span class="ml-1 text-sm text-gray-400"><%= count == 1 ? dt("1 product") : dt("%{count} products", count: count) %></span>
+  <% if filters_active? %>
+    <%= link_to dt("Reset"), request.path, class: "text-sm font-medium text-accent-600 hover:text-accent-700" %>
+  <% end %>
+</form>

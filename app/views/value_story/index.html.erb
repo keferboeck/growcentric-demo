@@ -1,0 +1,181 @@
+<% content_for :title, dt("Growth story") %>
+
+<div class="mx-auto max-w-5xl">
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="min-w-0 flex-1">
+      <%= link_to dt("← Dashboard"), root_path, class: "text-sm font-medium text-gray-400 hover:text-accent-600" %>
+      <h1 class="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl"><%= dt("How you got to +%{amount}", amount: euro_compact(@value_added_cents)) %></h1>
+      <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-500"><%= dt("Every intervention since the engine went live, on the curve where it happened. Including the one that backfired, and how the guardrails caught it.") %></p>
+    </div>
+  </div>
+
+  <dl class="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <%= render "shared/stat_tile", label: dt("Value added, 70 days"), value: "+#{euro_compact(@value_added_cents)}",
+        note: dt("vs the modelled no-intervention baseline") %>
+    <%= render "shared/stat_tile", label: dt("Current run-rate"), value: "+€1.490",
+        note: dt("per week, from 8 compounding actions") %>
+    <%= render "shared/stat_tile", label: dt("Best single action"), value: "+€430",
+        note: dt("per week: the €1.800 budget shift to Bikepacking") %>
+    <%= render "shared/stat_tile", label: dt("Backfired"), value: "1 / 9",
+        note: dt("caught by guardrails in 6 days, fully recovered") %>
+  </dl>
+
+  <%
+    vb_w = 960
+    vb_h = 420
+    pad_l = 58
+    pad_r = 36
+    pad_t = 76
+    pad_b = 44
+    days = @daily.map(&:day)
+    max = @daily.map(&:actual_cents).max * 1.04
+    min = @daily.map(&:baseline_cents).min * 0.97
+    x = ->(day) { pad_l + (day - days.first).to_f / (days.last - days.first) * (vb_w - pad_l - pad_r) }
+    y = ->(cents) { pad_t + (1 - (cents - min) / (max - min)) * (vb_h - pad_t - pad_b) }
+    actual_pts = @daily.map { |p| [x.(p.day).round(1), y.(p.actual_cents).round(1)] }
+    base_pts = @daily.map { |p| [x.(p.day).round(1), y.(p.baseline_cents).round(1)] }
+    path = ->(pts) { pts.each_with_index.map { |(px, py), i| "#{i.zero? ? 'M' : 'L'}#{px} #{py}" }.join(" ") }
+    wedge = (actual_pts + base_pts.reverse).map { |(px, py)| "#{px},#{py}" }.join(" ")
+    marker_color = { milestone: "#030712", repricing: "#9d3ff7", ab_test: "#0284c7", setback: "#f43f5e",
+                     correction: "#10b981", budget: "#10b981", campaign: "#4f46e5" }
+    day_lookup = @daily.index_by(&:day)
+    markers = @events.filter_map do |event|
+      point = day_lookup[event[:day]] || day_lookup[event[:day] + 1] || day_lookup[event[:day] - 1]
+      next unless point
+      [event, x.(point.day).round(1), y.(point.actual_cents).round(1)]
+    end
+  %>
+  <div class="mt-8 rounded-2xl p-px bg-brand-gradient shadow-sm">
+    <div class="rounded-[calc(1rem-1px)] bg-white p-6 sm:p-8">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-semibold"><%= dt("The curve, annotated") %></h2>
+          <p class="mt-1 text-xs text-gray-400"><%= dt("Daily revenue against the baseline. Click a number to jump to what happened there.") %></p>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-500">
+          <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded bg-gray-950"></span><%= dt("With GrowCentric") %></span>
+          <span class="inline-flex items-center gap-x-2"><span class="h-0.5 w-4 rounded" style="background:repeating-linear-gradient(90deg,#9ca3af 0 4px,transparent 4px 7px)"></span><%= dt("Baseline") %></span>
+          <span class="inline-flex items-center gap-x-2"><span class="h-2.5 w-4 rounded-sm" style="background:#b060ff26"></span><%= dt("Value added") %></span>
+          <span class="inline-flex items-center gap-x-2"><span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span><%= dt("Auto-action, no review needed") %></span>
+        </div>
+      </div>
+      <div id="story-chart" class="relative mt-6">
+        <svg viewBox="0 0 <%= vb_w %> <%= vb_h %>" class="w-full" style="height:auto" role="img" aria-label="<%= dt("Daily revenue versus baseline with numbered intervention markers") %>">
+          <% y_axis_ticks(min, max).each do |tick| %>
+            <line x1="<%= pad_l %>" x2="<%= vb_w - pad_r %>" y1="<%= y.(tick).round(1) %>" y2="<%= y.(tick).round(1) %>" stroke="#f3f4f6" stroke-width="1" />
+            <text x="<%= pad_l - 10 %>" y="<%= (y.(tick) + 3).round(1) %>" text-anchor="end" class="fill-gray-400" font-size="11"><%= euro_compact(tick) %></text>
+          <% end %>
+          <% days.select { |d| d.day == 1 }.each do |d| %>
+            <text x="<%= x.(d).round(1) %>" y="<%= vb_h - 12 %>" text-anchor="middle" class="fill-gray-400" font-size="11"><%= l(d, format: "%b") %></text>
+          <% end %>
+          <polygon points="<%= wedge %>" fill="#b060ff" fill-opacity="0.14" />
+          <path d="<%= path.(base_pts) %>" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 4" stroke-linejoin="round" stroke-linecap="round" />
+          <path d="<%= path.(actual_pts) %>" fill="none" stroke="#030712" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+
+          <!-- minor auto-actions -->
+          <% @minor_days.each do |day| %>
+            <% point = day_lookup[day] %>
+            <% next unless point %>
+            <circle cx="<%= x.(point.day).round(1) %>" cy="<%= y.(point.actual_cents).round(1) %>" r="3" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5" />
+          <% end %>
+
+          <!-- numbered interventions, stems alternating height so labels never collide -->
+          <% markers.each do |event, mx, my| %>
+            <% lift = event[:n].odd? ? 34 : 58 %>
+            <g data-role="marker" data-target="event-<%= event[:n] %>" class="cursor-pointer">
+              <line x1="<%= mx %>" x2="<%= mx %>" y1="<%= my %>" y2="<%= my - lift + 10 %>" stroke="<%= marker_color.fetch(event[:type]) %>" stroke-width="1.5" opacity="0.45" />
+              <circle cx="<%= mx %>" cy="<%= my - lift %>" r="11" fill="<%= marker_color.fetch(event[:type]) %>" stroke="#ffffff" stroke-width="2.5" />
+              <text x="<%= mx %>" y="<%= my - lift + 3.5 %>" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700"><%= event[:n] %></text>
+              <circle cx="<%= mx %>" cy="<%= my - lift %>" r="19" fill="transparent" />
+            </g>
+          <% end %>
+        </svg>
+        <div data-role="tooltip" class="pointer-events-none absolute z-10 hidden rounded-lg bg-gray-950 px-3 py-1.5 text-xs font-medium text-white shadow-lg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-12">
+    <h2 class="text-base font-semibold"><%= dt("What happened, step by step") %></h2>
+    <ol class="mt-6 space-y-6">
+      <% @events.each_with_index do |event, i| %>
+        <li id="event-<%= event[:n] %>" class="relative flex gap-x-5">
+          <% unless i == @events.size - 1 %>
+            <div class="absolute left-[15px] top-10 h-[calc(100%+1.5rem)] w-px bg-gray-200"></div>
+          <% end %>
+          <div class="relative mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ring-4 ring-gray-50" style="background: <%= marker_color.fetch(event[:type]) %>"><%= event[:n] %></div>
+          <div class="min-w-0 flex-1 rounded-2xl bg-white p-6 shadow-sm ring-1 <%= event[:type] == :setback ? 'ring-rose-200' : 'ring-gray-950/5' %> transition-shadow">
+            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <div class="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                <p class="text-sm font-semibold"><%= dt(event[:title]) %></p>
+                <%
+                  type_chip = {
+                    milestone:  ["bg-gray-100 text-gray-700", dt("Milestone")],
+                    repricing:  ["bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-600/20", dt("Repricing")],
+                    ab_test:    ["bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-600/20", dt("A/B test")],
+                    setback:    ["bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20", dt("Setback")],
+                    correction: ["bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20", dt("Correction")],
+                    budget:     ["bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20", dt("Budget")],
+                    campaign:   ["bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-600/20", dt("Campaign")]
+                  }.fetch(event[:type])
+                %>
+                <span class="rounded-md px-2 py-0.5 text-xs font-medium <%= type_chip[0] %>"><%= type_chip[1] %></span>
+                <span class="text-xs text-gray-400"><%= l(event[:day], format: "%-d %b %Y") %></span>
+              </div>
+              <% if event[:effect] %>
+                <span class="shrink-0 text-sm font-semibold tabular-nums <%= event[:effect].positive? ? 'text-emerald-600' : 'text-rose-600' %>">
+                  <%= event[:effect].positive? ? "+" : "−" %><%= euro(event[:effect].abs) %><span class="text-xs font-medium text-gray-400"> / <%= dt("week") %></span>
+                </span>
+              <% end %>
+            </div>
+            <p class="mt-2.5 text-sm leading-6 text-gray-500"><%= dt(event[:body]) %></p>
+            <% if event[:link] %>
+              <%= link_to dt("View details →"), send("#{event[:link]}_path"), class: "mt-3 inline-block text-xs font-semibold text-accent-600 hover:text-accent-700" %>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  </div>
+
+  <div class="mb-4 mt-12 rounded-2xl bg-gray-950 p-8 text-white">
+    <h2 class="text-base font-semibold"><%= dt("What the team should take from this") %></h2>
+    <p class="mt-3 max-w-3xl text-sm leading-7 text-gray-300"><%= dt("Value came from many small, reversible moves, not one hero decision. The single setback cost six days because a guardrail was watching; it would have cost a quarter if a human had to notice it in a spreadsheet. That is the system working as designed.") %></p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById("story-chart");
+    if (!root || root.dataset.bound) return;
+    root.dataset.bound = "1";
+    var tooltip = root.querySelector('[data-role="tooltip"]');
+    var titles = {};
+    document.querySelectorAll("[id^='event-']").forEach(function (card) {
+      var t = card.querySelector("p.font-semibold");
+      if (t) titles[card.id] = t.textContent;
+    });
+    root.querySelectorAll('[data-role="marker"]').forEach(function (marker) {
+      marker.addEventListener("click", function () {
+        var card = document.getElementById(marker.dataset.target);
+        if (!card) return;
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        var box = card.querySelector("div.rounded-2xl");
+        box.classList.add("ring-2", "ring-accent-400");
+        setTimeout(function () { box.classList.remove("ring-2", "ring-accent-400"); }, 2000);
+      });
+      marker.addEventListener("pointerenter", function () {
+        var circle = marker.querySelector("circle");
+        var rect = root.querySelector("svg").getBoundingClientRect();
+        var scale = rect.width / <%= vb_w %>;
+        tooltip.textContent = titles[marker.dataset.target] || "";
+        tooltip.style.left = Math.min(circle.cx.baseVal.value * scale + 14, rect.width - 200) + "px";
+        tooltip.style.top = (circle.cy.baseVal.value * rect.height / <%= vb_h %> - 34) + "px";
+        tooltip.classList.remove("hidden");
+      });
+      marker.addEventListener("pointerleave", function () {
+        tooltip.classList.add("hidden");
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,95 @@
+<% content_for :title, dt("Dashboard") %>
+
+<%= render "shared/page_header",
+    title: dt("Overview"),
+    subtitle: dt("Your catalog potential, competitive position and forecast in one view.") %>
+
+<%= render "dashboard/value_added",
+    value_weekly: @value_weekly, value_added_cents: @value_added_cents,
+    value_share_pct: @value_share_pct, value_live_days: @value_live_days,
+    value_breakdown: @value_breakdown %>
+
+<% revenue_delta = (@revenue_30d_cents - @prev_30d_cents) * 100.0 / @prev_30d_cents %>
+<% forecast_delta = (@forecast_30d_cents - @revenue_30d_cents) * 100.0 / @revenue_30d_cents %>
+
+<dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "shared/stat_tile", label: dt("Revenue, last 30 days"), value: euro_compact(@revenue_30d_cents),
+      delta: signed_pct(revenue_delta), delta_positive: revenue_delta.positive?, spark: @spark_points %>
+  <%= render "shared/stat_tile", label: dt("Forecast, next 30 days"), value: euro_compact(@forecast_30d_cents),
+      delta: signed_pct(forecast_delta), delta_positive: forecast_delta.positive?, delta_label: dt("vs last 30 days") %>
+  <%= render "shared/stat_tile", label: dt("Hidden gems in catalog"), value: @hidden_gems.count,
+      note: dt("%{amount} monthly revenue, barely promoted", amount: euro_compact(@hidden_gems.sum(&:monthly_revenue_cents))) %>
+  <%= render "shared/stat_tile", label: dt("Competitors tracked"), value: @competitor_count,
+      note: dt("%{count} actively sponsoring against you", count: @sponsored_competitors) %>
+</dl>
+
+<%= render "dashboard/product_matrix", products: @matrix_products %>
+
+<div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 lg:col-span-2">
+    <div class="flex items-center justify-between">
+      <h2 class="text-base font-semibold"><%= dt("Revenue & forecast") %></h2>
+      <%= link_to dt("Open forecast →"), forecast_path, class: "text-sm font-medium text-accent-600 hover:text-accent-700" %>
+    </div>
+    <div class="mt-4">
+      <%= render "shared/forecast_chart", points: @forecast_points, dom_id: "dashboard-chart", height: 260 %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5">
+    <h2 class="text-base font-semibold"><%= dt("Latest signals") %></h2>
+    <ul role="list" class="mt-4 divide-y divide-gray-100">
+      <% @alerts.each do |alert| %>
+        <li class="py-3">
+          <div class="flex items-center gap-x-2">
+            <%= severity_badge(alert.severity) %>
+            <span class="text-xs text-gray-400"><%= dt("%{time} ago", time: time_ago_in_words(alert.occurred_at)) %></span>
+          </div>
+          <p class="mt-1.5 text-sm font-medium leading-5"><%= dt(alert.title) %></p>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 lg:col-span-2">
+    <div class="flex items-center justify-between">
+      <h2 class="text-base font-semibold"><%= dt("Top recommendations") %></h2>
+      <%= link_to dt("All recommendations →"), recommendations_path, class: "text-sm font-medium text-accent-600 hover:text-accent-700" %>
+    </div>
+    <ul role="list" class="mt-4 divide-y divide-gray-100">
+      <% @recommendations.each do |rec| %>
+        <li class="flex items-start justify-between gap-x-4 py-4">
+          <div>
+            <p class="text-sm font-semibold"><%= dt(rec.title) %></p>
+            <p class="mt-1 line-clamp-2 text-sm leading-5 text-gray-500"><%= dt(rec.body) %></p>
+          </div>
+          <div class="shrink-0 text-right">
+            <p class="text-sm font-semibold text-emerald-600">+<%= euro_compact(rec.impact_cents) %>/mo</p>
+            <p class="mt-0.5 text-xs text-gray-400"><%= dt("%{pct}% confidence", pct: rec.confidence) %></p>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="rounded-2xl p-px bg-brand-gradient shadow-sm">
+    <div class="h-full rounded-[calc(1rem-1px)] bg-white p-6">
+      <h2 class="text-base font-semibold"><%= dt("Hidden gems") %></h2>
+      <p class="mt-1 text-sm text-gray-500"><%= dt("Products with untapped potential nobody is pushing.") %></p>
+      <ul role="list" class="mt-4 space-y-3">
+        <% @hidden_gems.limit(4).each do |product| %>
+          <li class="flex items-center justify-between gap-x-3">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium"><%= product.name %></p>
+              <p class="text-xs text-gray-400"><%= dt(product.category.name) %></p>
+            </div>
+            <span class="shrink-0 rounded-md bg-accent-50 px-2 py-1 text-xs font-semibold text-accent-700 ring-1 ring-inset ring-accent-600/20"><%= product.potential_score %></span>
+          </li>
+        <% end %>
+      </ul>
+      <%= link_to dt("Explore hidden potential →"), products_path, class: "mt-5 inline-block text-sm font-medium text-accent-600 hover:text-accent-700" %>
+    </div>
+  </div>
+</div>
