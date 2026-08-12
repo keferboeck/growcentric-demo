@@ -1218,6 +1218,15 @@ module GermanDictionary
     "At least %{count} characters" => "Mindestens %{count} Zeichen",
     "Confirm new password" => "Neues Passwort bestätigen",
     "Save new password" => "Neues Passwort speichern",
-    "All rights reserved." => "Alle Rechte vorbehalten."
+    "All rights reserved." => "Alle Rechte vorbehalten.",
+
+    # Cookie consent
+    "Cookies, the honest version" => "Cookies, ehrlich erklärt",
+    "We would like to use cookies for analytics and to measure our ads. Nothing runs until you decide, and only the essentials run if you decline." => "Wir möchten Cookies für Analysen und zur Messung unserer Werbung nutzen. Nichts läuft, bevor du entscheidest, und wenn du ablehnst, laufen nur die notwendigen.",
+    "Cookie policy" => "Cookie-Richtlinie",
+    "Accept all" => "Alle akzeptieren",
+    "Only essential" => "Nur notwendige",
+    "Which cookies growcentric.ai and app.growcentric.ai set, what they do, how long they live and how you can change your choice at any time." => "Welche Cookies growcentric.ai und app.growcentric.ai setzen, was sie tun, wie lange sie leben und wie du deine Wahl jederzeit ändern kannst.",
+    "Cookies" => "Cookies"
   }.freeze
 end

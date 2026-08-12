@@ -1,0 +1,6 @@
+<% content_for :title, dt("Cookie policy") %>
+<% content_for :meta_description, dt("Which cookies growcentric.ai and app.growcentric.ai set, what they do, how long they live and how you can change your choice at any time.") %>
+
+<div class="mx-auto w-full max-w-3xl">
+  <%= render I18n.locale == :de ? "legal/cookies_de" : "legal/cookies_en" %>
+</div>

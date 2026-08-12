@@ -1,0 +1,116 @@
+<%# Cookie consent banner, shared logic with growcentric.ai:
+    accept is stored on .growcentric.ai (silences both sites), denial is
+    stored host only and clears the shared accept, so the other site asks
+    fresh. Tracking (GA4, Google Ads, LinkedIn) loads only after consent,
+    via Google Consent Mode v2. IDs with an X are unconfigured and skipped. %>
+<div id="gc-cookie-banner" class="fixed inset-x-4 bottom-4 z-[90] hidden sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-md">
+  <div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-950/10">
+    <p class="text-sm font-semibold"><%= dt("Cookies, the honest version") %></p>
+    <p class="mt-2 text-sm leading-6 text-gray-600">
+      <%= dt("We would like to use cookies for analytics and to measure our ads. Nothing runs until you decide, and only the essentials run if you decline.") %>
+      <%= link_to dt("Cookie policy"), legal_cookies_path, class: "font-medium text-gray-950 underline hover:text-gray-600" %>
+    </p>
+    <div class="mt-4 flex gap-3">
+      <button type="button" data-consent="accepted" class="flex-1 rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"><%= dt("Accept all") %></button>
+      <button type="button" data-consent="denied" class="flex-1 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-950 ring-1 ring-inset ring-gray-200 hover:bg-gray-50"><%= dt("Only essential") %></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var NAME = "gc_cookie_consent";
+    var ROOT = "growcentric.ai";
+    var GA_ID = "G-XXXXXXXXXX";
+    var ADS_ID = "AW-XXXXXXXXXX";
+    var LINKEDIN_ID = "XXXXXXX";
+    var FATHOM_ID = "XXXXXXXX";
+    var configured = function (id) { return id.indexOf("X") === -1; };
+
+    function onRoot() {
+      var h = location.hostname;
+      return h === ROOT || h.slice(-(ROOT.length + 1)) === "." + ROOT;
+    }
+    function values() {
+      return document.cookie.split(/;\s*/).filter(function (c) {
+        return c.indexOf(NAME + "=") === 0;
+      }).map(function (c) { return c.slice(NAME.length + 1); });
+    }
+    function consent() {
+      var v = values();
+      if (v.indexOf("denied") !== -1) return "denied";
+      if (v.indexOf("accepted") !== -1) return "accepted";
+      return null;
+    }
+    function clearAll() {
+      document.cookie = NAME + "=; max-age=0; path=/";
+      if (onRoot()) document.cookie = NAME + "=; max-age=0; path=/; domain=." + ROOT;
+    }
+    function set(value) {
+      clearAll();
+      var secure = location.protocol === "https:" ? "; Secure" : "";
+      if (value === "accepted") {
+        var domain = onRoot() ? "; domain=." + ROOT : "";
+        document.cookie = NAME + "=accepted; max-age=31536000; path=/" + domain + "; SameSite=Lax" + secure;
+      } else {
+        document.cookie = NAME + "=denied; max-age=15552000; path=/; SameSite=Lax" + secure;
+      }
+    }
+    function inject(src, attrs) {
+      var s = document.createElement("script");
+      s.src = src; s.async = true;
+      for (var k in (attrs || {})) s.setAttribute(k, attrs[k]);
+      document.head.appendChild(s);
+    }
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+    gtag("consent", "default", {
+      ad_storage: "denied", ad_user_data: "denied",
+      ad_personalization: "denied", analytics_storage: "denied",
+      wait_for_update: 500
+    });
+    if (configured(FATHOM_ID)) inject("https://cdn.usefathom.com/script.js", { "data-site": FATHOM_ID, defer: "true" });
+
+    function loadTracking() {
+      if (window.__gcTrackingLoaded) return;
+      window.__gcTrackingLoaded = true;
+      gtag("consent", "update", {
+        ad_storage: "granted", ad_user_data: "granted",
+        ad_personalization: "granted", analytics_storage: "granted"
+      });
+      if (configured(GA_ID)) {
+        inject("https://www.googletagmanager.com/gtag/js?id=" + GA_ID);
+        gtag("js", new Date());
+        gtag("config", GA_ID);
+        if (configured(ADS_ID)) gtag("config", ADS_ID);
+      }
+      if (configured(LINKEDIN_ID)) {
+        window._linkedin_partner_id = LINKEDIN_ID;
+        window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+        window._linkedin_data_partner_ids.push(LINKEDIN_ID);
+        inject("https://snap.licdn.com/li.lms-analytics/insight.min.js");
+      }
+    }
+
+    var banner = document.getElementById("gc-cookie-banner");
+    if (!banner || banner.dataset.bound) return;
+    banner.dataset.bound = "1";
+    var current = consent();
+    if (current === "accepted") {
+      loadTracking();
+    } else if (current === null) {
+      banner.classList.remove("hidden");
+    }
+    banner.addEventListener("click", function (e) {
+      var choice = e.target && e.target.getAttribute("data-consent");
+      if (!choice) return;
+      set(choice);
+      if (choice === "accepted") loadTracking();
+      banner.classList.add("hidden");
+    });
+
+    // The cookie policy page offers a reset button.
+    window.__gcResetConsent = function () { clearAll(); location.reload(); };
+  })();
+</script>

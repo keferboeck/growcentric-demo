@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   # Invite-only beta: no self-signup, /register just explains how to get access.
   get "register", to: "auth#register", as: :register
 
+  get "legal/cookies", to: "legal#cookies", as: :legal_cookies
+
   get "sherpa", to: "sherpa#index", as: :sherpa
   get "value-story", to: "value_story#index", as: :value_story
   get "content", to: "content#catalog", as: :content
