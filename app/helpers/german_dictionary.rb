@@ -1227,6 +1227,7 @@ module GermanDictionary
     "Accept all" => "Alle akzeptieren",
     "Only essential" => "Nur notwendige",
     "Which cookies growcentric.ai and app.growcentric.ai set, what they do, how long they live and how you can change your choice at any time." => "Welche Cookies growcentric.ai und app.growcentric.ai setzen, was sie tun, wie lange sie leben und wie du deine Wahl jederzeit ändern kannst.",
-    "Cookies" => "Cookies"
+    "Cookies" => "Cookies",
+    "Privacy" => "Datenschutz"
   }.freeze
 end
