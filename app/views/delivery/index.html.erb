@@ -135,7 +135,7 @@
           </div>
           <p class="mt-1 text-xs text-gray-400">
             <%= event.discount %> · <%= dt(event.categories) %> ·
-            <%= l(event.started_on, format: "%-d %b %Y") %><%= event.ended_on ? " – #{l(event.ended_on, format: '%-d %b %Y')}" : " →" %>
+            <%= l(event.started_on, format: "%-d %b %Y") %><%= event.ended_on ? " - #{l(event.ended_on, format: '%-d %b %Y')}" : " →" %>
           </p>
           <p class="mt-1.5 text-sm text-gray-500"><%= dt(event.note) %></p>
         </li>

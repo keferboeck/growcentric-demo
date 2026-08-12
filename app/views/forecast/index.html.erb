@@ -11,7 +11,7 @@
       delta: signed_pct(delta), delta_positive: delta.positive?, delta_label: dt("vs last 30 days actual") %>
   <%= render "shared/stat_tile", label: dt("Last 30 days, actual"), value: euro_compact(@actual_30d_cents),
       note: dt("baseline the forecast is measured against") %>
-  <%= render "shared/stat_tile", label: dt("Forecast confidence"), value: "±5–12%",
+  <%= render "shared/stat_tile", label: dt("Forecast confidence"), value: "±5-12%",
       note: dt("widens with horizon · daily granularity") %>
 </dl>
 
@@ -54,7 +54,7 @@
             <td class="py-3 pl-6 pr-3 font-medium"><%= l(week[:week], format: "%-d %b %Y") %></td>
             <td class="px-3 py-3 text-right tabular-nums text-gray-500"><%= week[:actual] ? euro(week[:actual]) : "-" %></td>
             <td class="px-3 py-3 text-right tabular-nums text-gray-500"><%= euro(week[:forecast]) %></td>
-            <td class="px-3 py-3 text-right tabular-nums text-xs text-gray-400"><%= euro(week[:lower]) %> – <%= euro(week[:upper]) %></td>
+            <td class="px-3 py-3 text-right tabular-nums text-xs text-gray-400"><%= euro(week[:lower]) %> - <%= euro(week[:upper]) %></td>
             <td class="py-3 pl-3 pr-6 text-right text-xs">
               <% if week[:actual] %>
                 <%= trend_text((week[:actual] - week[:forecast]) * 100.0 / week[:forecast]) %>

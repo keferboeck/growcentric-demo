@@ -8,7 +8,7 @@
       label: l(p.day, format: "%-d %b %Y"),
       actual: p.actual_cents && euro(p.actual_cents),
       forecast: p.day >= Date.current ? euro(p.forecast_cents) : nil,
-      range: p.day > Date.current ? "#{euro(p.lower_cents)} – #{euro(p.upper_cents)}" : nil
+      range: p.day > Date.current ? "#{euro(p.lower_cents)} - #{euro(p.upper_cents)}" : nil
     }
   end
 %>

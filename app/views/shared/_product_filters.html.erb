@@ -24,7 +24,7 @@
   <select name="tier" onchange="this.form.submit()" class="<%= select_css %>">
     <option value=""><%= dt("All price tiers") %></option>
     <% ["Entry", "Mid", "Premium"].each do |tier| %>
-      <option value="<%= tier %>" <%= "selected" if params[:tier] == tier %>><%= dt(tier) %> <%= { "Entry" => "(< €50)", "Mid" => "(€50–150)", "Premium" => "(> €150)" }[tier] %></option>
+      <option value="<%= tier %>" <%= "selected" if params[:tier] == tier %>><%= dt(tier) %> <%= { "Entry" => "(< €50)", "Mid" => "(€50-150)", "Premium" => "(> €150)" }[tier] %></option>
     <% end %>
   </select>
   <select name="season" onchange="this.form.submit()" class="<%= select_css %>">

@@ -13,9 +13,9 @@
     if from == to
       l(to, format: "%-d %b %Y")
     elsif from.year == to.year
-      "#{l(from, format: '%-d %b')} – #{l(to, format: '%-d %b %Y')}"
+      "#{l(from, format: '%-d %b')} - #{l(to, format: '%-d %b %Y')}"
     else
-      "#{l(from, format: '%-d %b %Y')} – #{l(to, format: '%-d %b %Y')}"
+      "#{l(from, format: '%-d %b %Y')} - #{l(to, format: '%-d %b %Y')}"
     end
   end
   compares = [
@@ -141,7 +141,7 @@
       if (!from || !to) return;
       var lang = document.documentElement.lang || "en-GB";
       var f = new Date(from), t = new Date(to);
-      label.textContent = f.toLocaleDateString(lang, { day: "numeric", month: "short" }) + " – " + t.toLocaleDateString(lang, { day: "numeric", month: "short", year: "numeric" });
+      label.textContent = f.toLocaleDateString(lang, { day: "numeric", month: "short" }) + " - " + t.toLocaleDateString(lang, { day: "numeric", month: "short", year: "numeric" });
       root.querySelectorAll('[data-role="preset"] [data-role="check"]').forEach(function (c) { c.classList.add("invisible"); });
       close();
     });
