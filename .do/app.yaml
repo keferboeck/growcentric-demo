@@ -60,33 +60,60 @@ services:
       - key: APP_HOST
         scope: RUN_TIME
         value: app.growcentric.ai
-      # Tracking: all optional, an unset platform never loads or sends.
-      # Client side tags (rendered into the consent banner):
+      # ---- Tracking ----
+      # All optional: an unset platform never loads in the browser and never
+      # receives server side events. Client tags load only after cookie
+      # consent (except Fathom, which is cookieless).
+      #
+      # GA4 measurement id, looks like G-XXXXXXXXXX.
+      # Where: GA4 -> Admin -> Data streams -> your web stream.
       - key: GA_MEASUREMENT_ID
         scope: RUN_TIME
         value: ""
+      # Google Ads conversion id, looks like AW-123456789. Rides on gtag,
+      # so it also needs GA_MEASUREMENT_ID.
+      # Where: Google Ads -> Tools -> Conversions.
       - key: GOOGLE_ADS_ID
         scope: RUN_TIME
         value: ""
+      # LinkedIn Insight Tag partner id, a number like 1234567.
+      # Where: Campaign Manager -> Analyze -> Insight Tag -> Manage.
       - key: LINKEDIN_PARTNER_ID
         scope: RUN_TIME
         value: ""
+      # Meta Pixel id, a number like 123456789012345. Sets the _fbp and
+      # _fbc cookies documented in the cookie policy.
+      # Where: Meta Events Manager -> Data sources -> your pixel.
       - key: META_PIXEL_ID
         scope: RUN_TIME
         value: ""
+      # Fathom site id, looks like ABCDEFGH. Cookieless, loads without
+      # consent. Where: Fathom -> Settings -> Sites.
       - key: FATHOM_SITE_ID
         scope: RUN_TIME
         value: ""
-      # Server side APIs (GA4 Measurement Protocol, Meta and LinkedIn
-      # Conversions APIs), used by app/services/analytics.rb:
+      # ---- Server side tracking APIs ----
+      # Used by app/services/analytics.rb via POST /track; events are only
+      # forwarded when the visitor's consent cookie says accepted.
+      #
+      # GA4 Measurement Protocol API secret. Pairs with GA_MEASUREMENT_ID.
+      # Where: GA4 -> Admin -> Data streams -> your stream -> Measurement
+      # Protocol API secrets -> Create.
       - key: GA4_API_SECRET
         scope: RUN_TIME
         type: SECRET
         value: ""
+      # Meta Conversions API access token. Pairs with META_PIXEL_ID.
+      # Where: Events Manager -> your pixel -> Settings -> Conversions API
+      # -> Generate access token.
       - key: META_CAPI_ACCESS_TOKEN
         scope: RUN_TIME
         type: SECRET
         value: ""
+      # LinkedIn Conversions API OAuth token (scopes r_ads, rw_conversions).
+      # LinkedIn only accepts events mapped to a conversion rule; create
+      # rules in Campaign Manager and pass their URNs to Analytics.track.
+      # Where: LinkedIn Developer portal -> your app -> Auth.
       - key: LINKEDIN_CAPI_ACCESS_TOKEN
         scope: RUN_TIME
         type: SECRET
