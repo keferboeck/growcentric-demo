@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   get "register", to: "auth#register", as: :register
 
   get "legal/cookies", to: "legal#cookies", as: :legal_cookies
+  post "track", to: "tracking#create"
 
   get "sherpa", to: "sherpa#index", as: :sherpa
   get "value-story", to: "value_story#index", as: :value_story

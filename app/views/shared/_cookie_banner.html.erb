@@ -21,11 +21,12 @@
   (function () {
     var NAME = "gc_cookie_consent";
     var ROOT = "growcentric.ai";
-    var GA_ID = "G-XXXXXXXXXX";
-    var ADS_ID = "AW-XXXXXXXXXX";
-    var LINKEDIN_ID = "XXXXXXX";
-    var FATHOM_ID = "XXXXXXXX";
-    var configured = function (id) { return id.indexOf("X") === -1; };
+    var GA_ID = "<%= ENV.fetch("GA_MEASUREMENT_ID", "") %>";
+    var ADS_ID = "<%= ENV.fetch("GOOGLE_ADS_ID", "") %>";
+    var LINKEDIN_ID = "<%= ENV.fetch("LINKEDIN_PARTNER_ID", "") %>";
+    var META_PIXEL_ID = "<%= ENV.fetch("META_PIXEL_ID", "") %>";
+    var FATHOM_ID = "<%= ENV.fetch("FATHOM_SITE_ID", "") %>";
+    var configured = function (id) { return id !== "" && id.indexOf("X") === -1; };
 
     function onRoot() {
       var h = location.hostname;
@@ -91,7 +92,38 @@
         window._linkedin_data_partner_ids.push(LINKEDIN_ID);
         inject("https://snap.licdn.com/li.lms-analytics/insight.min.js");
       }
+      if (configured(META_PIXEL_ID)) {
+        if (!window.fbq) {
+          var fbq = function () {
+            fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
+          };
+          fbq.push = fbq; fbq.loaded = true; fbq.version = "2.0"; fbq.queue = [];
+          window.fbq = fbq; window._fbq = fbq;
+          inject("https://connect.facebook.net/en_US/fbevents.js");
+        }
+        window.fbq("init", META_PIXEL_ID);
+        window.fbq("track", "PageView");
+      }
     }
+
+    // Basic event tracking; events themselves get defined later. Fans out to
+    // every configured platform (Fathom is cookieless and needs no consent)
+    // and to the server for Measurement Protocol and Conversions API sends.
+    window.gcTrack = function (name, properties) {
+      properties = properties || {};
+      if (configured(FATHOM_ID) && window.fathom) window.fathom.trackEvent(name);
+      if (consent() === "accepted") {
+        if (configured(GA_ID)) gtag("event", name, properties);
+        if (configured(META_PIXEL_ID) && window.fbq) window.fbq("trackCustom", name, properties);
+        if (configured(LINKEDIN_ID) && window.lintrk && properties.linkedin_conversion_id) {
+          window.lintrk("track", { conversion_id: properties.linkedin_conversion_id });
+        }
+        var payload = JSON.stringify({ name: name, properties: properties, url: location.href });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon("/track", new Blob([payload], { type: "application/json" }));
+        }
+      }
+    };
 
     var banner = document.getElementById("gc-cookie-banner");
     if (!banner || banner.dataset.bound) return;

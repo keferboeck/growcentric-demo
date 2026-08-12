@@ -60,6 +60,37 @@ services:
       - key: APP_HOST
         scope: RUN_TIME
         value: app.growcentric.ai
+      # Tracking: all optional, an unset platform never loads or sends.
+      # Client side tags (rendered into the consent banner):
+      - key: GA_MEASUREMENT_ID
+        scope: RUN_TIME
+        value: ""
+      - key: GOOGLE_ADS_ID
+        scope: RUN_TIME
+        value: ""
+      - key: LINKEDIN_PARTNER_ID
+        scope: RUN_TIME
+        value: ""
+      - key: META_PIXEL_ID
+        scope: RUN_TIME
+        value: ""
+      - key: FATHOM_SITE_ID
+        scope: RUN_TIME
+        value: ""
+      # Server side APIs (GA4 Measurement Protocol, Meta and LinkedIn
+      # Conversions APIs), used by app/services/analytics.rb:
+      - key: GA4_API_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ""
+      - key: META_CAPI_ACCESS_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+        value: ""
+      - key: LINKEDIN_CAPI_ACCESS_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+        value: ""
 
 # Release phase: App Platform runs PRE_DEPLOY jobs after the build and before
 # the new version goes live (DO ignores Heroku-style `release:` Procfile lines).
