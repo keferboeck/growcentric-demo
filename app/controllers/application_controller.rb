@@ -1,12 +1,33 @@
 class ApplicationController < ActionController::Base
   around_action :switch_locale
+  before_action :switch_currency
   before_action :authenticate_user!, unless: :devise_controller?
+  after_action :rewrite_currency
+
+  helper_method :current_currency
 
   private
 
   def switch_locale(&action)
     session[:locale] = params[:locale] if params[:locale].present? && I18n.available_locales.map(&:to_s).include?(params[:locale])
     I18n.with_locale(session[:locale] || detected_locale, &action)
+  end
+
+  # Display currency for localised screenshots (?currency=GBP). Data stays
+  # euro-denominated; DemoCurrency rewrites amounts in the rendered HTML.
+  def switch_currency
+    session[:currency] = params[:currency] if DemoCurrency::CURRENCIES.key?(params[:currency].to_s)
+  end
+
+  def current_currency
+    session[:currency] || "EUR"
+  end
+
+  def rewrite_currency
+    return if current_currency == "EUR"
+    return unless response.media_type == "text/html" && response.body.present?
+
+    response.body = DemoCurrency.rewrite(response.body, current_currency)
   end
 
   # Locale resolution when the visitor has not picked a language yet:

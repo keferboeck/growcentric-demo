@@ -1228,6 +1228,23 @@ module GermanDictionary
     "Only essential" => "Nur notwendige",
     "Which cookies growcentric.ai and app.growcentric.ai set, what they do, how long they live and how you can change your choice at any time." => "Welche Cookies growcentric.ai und app.growcentric.ai setzen, was sie tun, wie lange sie leben und wie du deine Wahl jederzeit ändern kannst.",
     "Cookies" => "Cookies",
-    "Privacy" => "Datenschutz"
+    "Privacy" => "Datenschutz",
+    "Display currency" => "Anzeigewährung",
+
+    # Velora test store landing page
+    "Demo test store" => "Demo Teststore",
+    "The fictional shop behind the GrowCentric.ai demo" => "Der fiktive Shop hinter der GrowCentric.ai Demo",
+    "Every screen in the GrowCentric.ai demo talks about velora.keferboeck.com, a bike shop that does not really exist. This page is where it lives: a small generator produces the shop's data around the clock, so the demo always has something fresh to show." => "Jede Ansicht in der GrowCentric.ai Demo spricht von velora.keferboeck.com, einem Fahrradshop, den es in Wirklichkeit nicht gibt. Diese Seite ist sein Zuhause: Ein kleiner Generator erzeugt die Daten des Shops rund um die Uhr, damit die Demo immer etwas Frisches zu zeigen hat.",
+    "Live" => "Live",
+    "The feed above is computed on the server as a pure function of the current time. It runs at the shop's natural pace, whether anyone is watching or not." => "Der Feed oben wird auf dem Server als reine Funktion der aktuellen Zeit berechnet. Er läuft im natürlichen Tempo des Shops, egal ob gerade jemand zusieht oder nicht.",
+    "Generated on the server" => "Auf dem Server erzeugt",
+    "Every line is derived server side from the clock. Your browser only displays the stream, it never invents data." => "Jede Zeile wird serverseitig aus der Uhrzeit abgeleitet. Dein Browser zeigt den Stream nur an, er erfindet keine Daten.",
+    "Never duplicated" => "Niemals doppelt",
+    "Each moment in time produces its events exactly once. No matter when you visit, you always join a unique, ongoing session." => "Jeder Zeitpunkt erzeugt seine Ereignisse genau einmal. Egal wann du vorbeischaust, du steigst immer in eine einmalige, laufende Session ein.",
+    "Consistent everywhere" => "Überall konsistent",
+    "Open this page in a second browser or on your phone: both show exactly the same events at the same second." => "Öffne diese Seite in einem zweiten Browser oder am Handy: Beide zeigen in derselben Sekunde exakt dieselben Ereignisse.",
+    "Open the GrowCentric.ai demo" => "Zur GrowCentric.ai Demo",
+    "Access is invite only, but the tour is worth it." => "Zugang gibt es nur auf Einladung, aber die Tour lohnt sich.",
+    "Velora Cycling Supply is the fictional test store of the GrowCentric.ai demo. This page generates the shop's demo data live on the server, around the clock." => "Velora Cycling Supply ist der fiktive Teststore der GrowCentric.ai Demo. Diese Seite erzeugt die Demodaten des Shops live auf dem Server, rund um die Uhr."
   }.freeze
 end

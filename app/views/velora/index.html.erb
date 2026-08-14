@@ -1,0 +1,68 @@
+<% content_for :title, "Velora Cycling Supply" %>
+<% content_for :meta_description, dt("Velora Cycling Supply is the fictional test store of the GrowCentric.ai demo. This page generates the shop's demo data live on the server, around the clock.") %>
+
+<div class="mx-auto w-full max-w-3xl">
+  <div class="flex flex-col items-center text-center">
+    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gradient text-2xl font-semibold text-gray-950 shadow-sm">V</div>
+    <span class="mt-6 inline-flex items-center rounded-full bg-brand-gradient px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-950"><%= dt("Demo test store") %></span>
+    <h1 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Velora Cycling Supply</h1>
+    <p class="mt-2 text-base font-medium text-gray-600"><%= dt("The fictional shop behind the GrowCentric.ai demo") %></p>
+    <p class="mt-4 max-w-2xl text-sm leading-6 text-gray-600">
+      <%= dt("Every screen in the GrowCentric.ai demo talks about velora.keferboeck.com, a bike shop that does not really exist. This page is where it lives: a small generator produces the shop's data around the clock, so the demo always has something fresh to show.") %>
+    </p>
+  </div>
+
+  <div class="mt-10 rounded-2xl p-px bg-brand-gradient shadow-lg">
+    <div class="overflow-hidden rounded-[calc(1rem-1px)] bg-gray-950">
+      <div class="flex items-center gap-x-2 border-b border-white/10 px-4 py-3">
+        <span class="h-3 w-3 rounded-full bg-red-400"></span>
+        <span class="h-3 w-3 rounded-full bg-amber-300"></span>
+        <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
+        <span class="ml-3 truncate font-mono text-xs text-gray-400">velora-datagen · /var/log/velora/feed.log · UTC</span>
+        <span class="ml-auto flex items-center gap-x-1.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+          </span>
+          <%= dt("Live") %>
+        </span>
+      </div>
+      <div data-controller="velora-feed"
+           data-velora-feed-url-value="<%= velora_feed_path %>"
+           data-velora-feed-last-value="<%= @last_slot %>"
+           data-velora-feed-initial-value="<%= @events.to_json %>">
+        <div data-velora-feed-target="log" class="h-80 overflow-y-auto px-4 py-3 font-mono text-xs leading-6">
+          <div data-velora-feed-target="cursor" class="flex items-center gap-x-1 text-gray-500">
+            <span>$</span><span class="h-3.5 w-2 animate-pulse bg-gray-400"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mt-3 text-center text-xs text-gray-400">
+    <%= dt("The feed above is computed on the server as a pure function of the current time. It runs at the shop's natural pace, whether anyone is watching or not.") %>
+  </p>
+
+  <div class="mt-10 grid gap-4 sm:grid-cols-3">
+    <div class="rounded-xl bg-white p-5 ring-1 ring-inset ring-gray-200">
+      <h2 class="text-sm font-semibold"><%= dt("Generated on the server") %></h2>
+      <p class="mt-2 text-xs leading-5 text-gray-500"><%= dt("Every line is derived server side from the clock. Your browser only displays the stream, it never invents data.") %></p>
+    </div>
+    <div class="rounded-xl bg-white p-5 ring-1 ring-inset ring-gray-200">
+      <h2 class="text-sm font-semibold"><%= dt("Never duplicated") %></h2>
+      <p class="mt-2 text-xs leading-5 text-gray-500"><%= dt("Each moment in time produces its events exactly once. No matter when you visit, you always join a unique, ongoing session.") %></p>
+    </div>
+    <div class="rounded-xl bg-white p-5 ring-1 ring-inset ring-gray-200">
+      <h2 class="text-sm font-semibold"><%= dt("Consistent everywhere") %></h2>
+      <p class="mt-2 text-xs leading-5 text-gray-500"><%= dt("Open this page in a second browser or on your phone: both show exactly the same events at the same second.") %></p>
+    </div>
+  </div>
+
+  <div class="mt-10 flex flex-col items-center gap-y-3">
+    <a href="<%= @demo_url %>" class="inline-flex items-center gap-x-2.5 rounded-full bg-gray-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800">
+      <%= render "shared/mark", css: "h-5 w-5", suffix: "-velora" %>
+      <%= dt("Open the GrowCentric.ai demo") %>
+    </a>
+    <p class="text-xs text-gray-400"><%= dt("Access is invite only, but the tour is worth it.") %></p>
+  </div>
+</div>

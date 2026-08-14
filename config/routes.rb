@@ -1,4 +1,14 @@
 Rails.application.routes.draw do
+  # velora.keferboeck.com (the demo's fictional shop domain) points at this
+  # app; on that host the root serves the test store landing page instead of
+  # the dashboard. The path routes below work on every host, so the page and
+  # its feed are also reachable in development at /velora.
+  constraints host: /\Avelora\./ do
+    get "/", to: "velora#index"
+  end
+  get "velora", to: "velora#index", as: :velora
+  get "velora/feed", to: "velora#feed", as: :velora_feed
+
   root "dashboard#index"
 
   # Login wall: Devise under friendly paths (/login, /logout, /password/reset).
