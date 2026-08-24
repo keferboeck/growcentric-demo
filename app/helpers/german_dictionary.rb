@@ -1199,6 +1199,7 @@ module GermanDictionary
     "Forgot password?" => "Passwort vergessen?",
     "Keep me signed in" => "Angemeldet bleiben",
     "New to GrowCentric?" => "Neu bei GrowCentric?",
+    "Learn more at" => "Mehr erfahren auf",
     "Request access" => "Zugang anfragen",
     "Create your account" => "Erstelle deinen Account",
     "Private beta" => "Private Beta",
